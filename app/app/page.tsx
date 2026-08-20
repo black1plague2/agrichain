@@ -46,7 +46,7 @@ export default function Home() {
         <span className="text-lg font-semibold tracking-tight text-text-on-color">AgriChain</span>
         <nav className="flex items-center gap-3">
           <Link href="/login">
-            <Button variant="ghost" className="border-border-strong px-3 py-2 text-xs text-text-on-color hover:bg-white/10">
+            <Button variant="ghost-inverse" className="px-3 py-2 text-xs">
               Log in
             </Button>
           </Link>
