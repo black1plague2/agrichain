@@ -38,7 +38,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
   return (
     <div className="flex flex-1 flex-col items-center bg-layer px-6 py-12 sm:px-10">
       <AutoRefresh />
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-3xl">
         <div className="mb-6 text-center">
           <Link href="/" className="text-2xl font-semibold text-text-primary">
             AgriChain

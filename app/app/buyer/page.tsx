@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getAvailableBatches, getBuyerEscrows, getLatestPrice } from "@/lib/data";
+import { getPlatformAnalytics } from "@/lib/analytics";
 import { Header } from "@/components/Header";
 import { Panel } from "@/components/ui/Panel";
 import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
@@ -9,12 +10,17 @@ import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 
 export default async function BuyerPage() {
   const session = await getSession();
   if (!session || session.role !== "buyer") redirect("/login");
 
-  const [available, myEscrows] = await Promise.all([getAvailableBatches(), getBuyerEscrows(session.wallet)]);
+  const [available, myEscrows, analytics] = await Promise.all([
+    getAvailableBatches(),
+    getBuyerEscrows(session.wallet),
+    getPlatformAnalytics(),
+  ]);
   const prices = await Promise.all(
     Array.from(new Set(available.map((b) => b.crop))).map(async (crop) => [crop, await getLatestPrice(crop)] as const)
   );
@@ -24,11 +30,13 @@ export default async function BuyerPage() {
     <div className="flex flex-1 flex-col">
       <AutoRefresh />
       <Header role={`Buyer — ${session.wallet.slice(0, 10)}…`} />
-      <main className="flex flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Verified Batches</h1>
           <p className="text-xs text-text-placeholder">Verified batches available for procurement</p>
         </div>
+
+        <AnalyticsPanel data={analytics} />
 
         <Panel title="Available Now" stamp={`${available.length} batches`}>
           {available.length === 0 ? (

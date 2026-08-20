@@ -1,10 +1,24 @@
 import { formatAgri, formatKg } from "@/components/ui/Numeral";
 
+export type ActivityCategory = "registration" | "pricing" | "logistics" | "weighbridge" | "settlement" | "dispute";
+
+/** Validated categorical palette (dataviz skill default, slots 1/2/3/4/6/5 in that fixed
+ * order — the order is the CVD-safety guarantee, not a cosmetic choice). Kept out of Tailwind
+ * theme tokens since these identify event *categories* in a timeline, not brand/status colors. */
+export const CATEGORY_CONFIG: Record<ActivityCategory, { label: string; color: string }> = {
+  registration: { label: "Registration", color: "#2a78d6" },
+  weighbridge: { label: "Weighbridge", color: "#eb6834" },
+  logistics: { label: "Logistics", color: "#1baf7a" },
+  pricing: { label: "Pricing", color: "#eda100" },
+  dispute: { label: "Dispute", color: "#e87ba4" },
+  settlement: { label: "Settlement", color: "#008300" },
+};
+
 export type ActivityEntry = {
   id: string;
   blockNumber: string;
   txHash: string;
-  icon: string;
+  category: ActivityCategory;
   text: string;
   processedAt: string;
 };
@@ -28,35 +42,63 @@ export function humanizeEvent(row: {
 
   switch (`${row.contractName}.${row.eventName}`) {
     case "BatchRegistry.BatchRegistered":
-      return { ...base, icon: "🌾", text: `New batch #${p.batchId} registered — ${formatKg(BigInt(p.quantityKg))} kg of ${p.crop}` };
+      return {
+        ...base,
+        category: "registration",
+        text: `Batch #${p.batchId} registered — ${formatKg(BigInt(p.quantityKg))} kg of ${p.crop}`,
+      };
     case "BatchRegistry.BatchStateChanged": {
       const from = STATUS_LABELS[Number(p.from)];
       const to = STATUS_LABELS[Number(p.to)];
       if (from === to) return null; // the REGISTERED->REGISTERED no-op emitted at registration
-      return { ...base, icon: "📦", text: `Batch #${p.batchId}: ${from} → ${to}` };
+      return { ...base, category: "logistics", text: `Batch #${p.batchId} moved from ${from} to ${to}` };
     }
     case "FairPriceOracle.PriceUpdated":
-      return { ...base, icon: "📈", text: `Price set: ${p.crop} @ ₹${formatAgri(BigInt(p.pricePerKg))}/kg` };
+      return { ...base, category: "pricing", text: `Price set for ${p.crop}: ₹${formatAgri(BigInt(p.pricePerKg))}/kg` };
     case "FairPriceOracle.PriceJumpFlagged":
-      return { ...base, icon: "🚩", text: `Price jump flagged for ${p.crop} — moved more than 20% in one update` };
+      return { ...base, category: "pricing", text: `Price jump flagged for ${p.crop} — moved more than 20% in one update` };
     case "WeighbridgeRegistry.DeviceAssigned":
-      return { ...base, icon: "🔧", text: `Weighbridge device assigned to batch #${p.batchId}` };
+      return { ...base, category: "weighbridge", text: `Weighbridge device assigned to batch #${p.batchId}` };
     case "WeighbridgeRegistry.WeightVerified":
-      return { ...base, icon: "⚖️", text: `Weight verified for batch #${p.batchId}: ${formatKg(BigInt(p.weightKg))} kg (device-signed)` };
+      return {
+        ...base,
+        category: "weighbridge",
+        text: `Weight verified for batch #${p.batchId}: ${formatKg(BigInt(p.weightKg))} kg, device-signed`,
+      };
     case "Escrow.EscrowOpened":
-      return { ...base, icon: "💰", text: `Buyer opened escrow on batch #${p.batchId} — ${formatAgri(BigInt(p.depositAmount))} AGRI locked` };
+      return {
+        ...base,
+        category: "settlement",
+        text: `Escrow opened on batch #${p.batchId} — ${formatAgri(BigInt(p.depositAmount))} AGRI locked`,
+      };
     case "Escrow.EscrowSettled":
-      return { ...base, icon: "✅", text: `Batch #${p.batchId} settled — farmer paid ${formatAgri(BigInt(p.farmerPayout))} AGRI` };
+      return {
+        ...base,
+        category: "settlement",
+        text: `Batch #${p.batchId} settled — farmer paid ${formatAgri(BigInt(p.farmerPayout))} AGRI`,
+      };
     case "Escrow.PenaltyApplied":
-      return { ...base, icon: "⚠️", text: `Weight deviation penalty on batch #${p.batchId} (${(Number(p.deviationBps) / 100).toFixed(1)}%)` };
+      return {
+        ...base,
+        category: "dispute",
+        text: `Weight deviation penalty on batch #${p.batchId} — ${(Number(p.deviationBps) / 100).toFixed(1)}%`,
+      };
     case "Escrow.EscrowRefundedOnTimeout":
-      return { ...base, icon: "↩️", text: `Batch #${p.batchId} escrow timed out — buyer refunded ${formatAgri(BigInt(p.amount))} AGRI` };
+      return {
+        ...base,
+        category: "dispute",
+        text: `Batch #${p.batchId} escrow timed out — buyer refunded ${formatAgri(BigInt(p.amount))} AGRI`,
+      };
     case "Escrow.DisputeFlagged":
-      return { ...base, icon: "🛑", text: `Batch #${p.batchId} escrow disputed — release paused` };
+      return { ...base, category: "dispute", text: `Batch #${p.batchId} escrow disputed — release paused` };
     case "Escrow.DisputeResolved":
-      return { ...base, icon: "🔓", text: `Batch #${p.batchId} dispute resolved` };
+      return { ...base, category: "dispute", text: `Batch #${p.batchId} dispute resolved` };
     case "Escrow.Withdrawn":
-      return { ...base, icon: "🏦", text: `${formatAgri(BigInt(p.amount))} AGRI withdrawn to ${p.account.slice(0, 8)}…` };
+      return {
+        ...base,
+        category: "settlement",
+        text: `${formatAgri(BigInt(p.amount))} AGRI withdrawn to ${p.account.slice(0, 8)}…`,
+      };
     default:
       return null; // RoleGranted and other setup/admin events — not shown, they're noise here
   }

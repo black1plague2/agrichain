@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getLogisticsPickups } from "@/lib/data";
+import { getPlatformAnalytics } from "@/lib/analytics";
 import { Header } from "@/components/Header";
 import { Panel } from "@/components/ui/Panel";
 import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
@@ -10,12 +11,13 @@ import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 
 export default async function LogisticsPage() {
   const session = await getSession();
   if (!session || session.role !== "logistics") redirect("/login");
 
-  const pickups = await getLogisticsPickups();
+  const [pickups, analytics] = await Promise.all([getLogisticsPickups(), getPlatformAnalytics()]);
   const settledCount = pickups.filter((p) => p.escrow.settled).length;
   const penaltyCount = pickups.filter(
     (p) => p.escrow.settled && p.escrow.farmerPayout != null && p.escrow.farmerPayout < p.escrow.depositAmount
@@ -25,7 +27,7 @@ export default async function LogisticsPage() {
     <div className="flex flex-1 flex-col">
       <AutoRefresh />
       <Header role={`Logistics — ${session.wallet.slice(0, 10)}…`} />
-      <main className="flex flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-text-primary">Pickup Queue</h1>
@@ -40,6 +42,8 @@ export default async function LogisticsPage() {
             </span>
           </div>
         </div>
+
+        <AnalyticsPanel data={analytics} />
 
         <Panel title="Active Batches" stamp={`${pickups.length} in flight`}>
           {pickups.length === 0 ? (

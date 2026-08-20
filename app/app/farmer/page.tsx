@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getFarmerBatches, getAgriBalance, getPendingWithdrawal } from "@/lib/data";
+import { getPlatformAnalytics } from "@/lib/analytics";
 import { Header } from "@/components/Header";
 import { Panel } from "@/components/ui/Panel";
 import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
@@ -11,22 +12,24 @@ import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 
 export default async function FarmerPage() {
   const session = await getSession();
   if (!session || session.role !== "farmer") redirect("/login");
 
-  const [batches, balance, pending] = await Promise.all([
+  const [batches, balance, pending, analytics] = await Promise.all([
     getFarmerBatches(session.wallet),
     getAgriBalance(session.wallet as `0x${string}`),
     getPendingWithdrawal(session.wallet as `0x${string}`),
+    getPlatformAnalytics(),
   ]);
 
   return (
     <div className="flex flex-1 flex-col">
       <AutoRefresh />
       <Header role={`Farmer — ${session.name ?? session.wallet.slice(0, 8)}`} />
-      <main className="flex flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-text-primary">Your Batches</h1>
@@ -42,6 +45,8 @@ export default async function FarmerPage() {
             <WithdrawButton pendingAmount={pending} />
           </div>
         </div>
+
+        <AnalyticsPanel data={analytics} />
 
         <Panel title="Register New Batch">
           <BatchRegisterForm farmerWallet={session.wallet} />

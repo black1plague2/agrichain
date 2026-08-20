@@ -19,3 +19,6 @@ contracts/lib/
 .vscode/
 *.log
 contracts/broadcast/
+
+# Local agent tooling (installed skills, symlinked per-machine)
+app/.agents/
