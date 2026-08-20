@@ -42,6 +42,21 @@ export function oracleFeedWalletClient() {
   return createWalletClient({ account, chain: amoy, transport: http() });
 }
 
+/** True only when this deployment is actually pointed at public Polygon Amoy — a local Anvil
+ * chain (id 31337, tunneled or not) has no public block explorer, so a hardcoded polygonscan.com
+ * link there is just dead. Every "view on explorer" / "proof" link should check this first rather
+ * than claim proof it can't actually show. */
+export const hasPublicExplorer = amoy.id === 80002;
+const AMOY_EXPLORER = "https://amoy.polygonscan.com";
+
+export function explorerTxUrl(hash: string): string | null {
+  return hasPublicExplorer ? `${AMOY_EXPLORER}/tx/${hash}` : null;
+}
+
+export function explorerAddressUrl(address: string): string | null {
+  return hasPublicExplorer ? `${AMOY_EXPLORER}/address/${address}` : null;
+}
+
 export const contractAddresses = {
   agriToken: process.env.NEXT_PUBLIC_AGRI_TOKEN_ADDRESS as Address,
   batchRegistry: process.env.NEXT_PUBLIC_BATCH_REGISTRY_ADDRESS as Address,

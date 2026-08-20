@@ -1,21 +1,29 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
+import { getLocale } from "@/lib/i18n/getLocale";
+import { dict } from "@/lib/i18n/dictionary";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const locale = await getLocale();
+  const t = dict(locale).auth;
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-layer px-6 py-16">
+      <div className="mb-4">
+        <LanguageSwitcher locale={locale} />
+      </div>
       <div className="mb-8 text-center">
         <Link href="/" className="text-2xl font-semibold text-text-primary">
-          AgriChain
+          {t.brand}
         </Link>
-        <p className="mt-2 text-sm text-text-secondary">Sign in to your account</p>
-        <p className="text-xs text-text-placeholder">Khaate mein wapas jaayein</p>
+        <p className="mt-2 text-sm text-text-secondary">{t.loginSubtitle}</p>
       </div>
-      <LoginForm />
+      <LoginForm locale={locale} />
       <p className="mt-8 text-sm text-text-secondary">
-        New here?{" "}
+        {t.newHere}{" "}
         <Link href="/register" className="font-medium text-accent underline">
-          Create an account
+          {t.createAccount}
         </Link>
       </p>
     </div>

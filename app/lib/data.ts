@@ -5,10 +5,11 @@ import { batches, escrows, priceHistory, weighbridgeReadings, rawEvents } from "
 import { publicClient, contractAddresses } from "./chain";
 import { agriTokenAbi, escrowAbi } from "./abis";
 import { humanizeEvent, type ActivityEntry } from "./activity";
+import type { Locale } from "./i18n/locale";
 
 /** Most recent human-readable activity across the whole platform — powers the live feed on
  * every dashboard. Reads the same raw_events log the indexer already writes, nothing new stored. */
-export async function getRecentActivity(limit = 20): Promise<ActivityEntry[]> {
+export async function getRecentActivity(limit = 20, locale: Locale = "en"): Promise<ActivityEntry[]> {
   const rows = await db
     .select()
     .from(rawEvents)
@@ -17,7 +18,7 @@ export async function getRecentActivity(limit = 20): Promise<ActivityEntry[]> {
 
   const entries: ActivityEntry[] = [];
   for (const row of rows) {
-    const entry = humanizeEvent(row);
+    const entry = humanizeEvent(row, locale);
     if (entry) entries.push(entry);
     if (entries.length >= limit) break;
   }
@@ -25,7 +26,7 @@ export async function getRecentActivity(limit = 20): Promise<ActivityEntry[]> {
 }
 
 /** Same feed, scoped to one batch — powers /verify/:batchId's story. */
-export async function getBatchActivity(batchId: bigint, limit = 20): Promise<ActivityEntry[]> {
+export async function getBatchActivity(batchId: bigint, limit = 20, locale: Locale = "en"): Promise<ActivityEntry[]> {
   const rows = await db
     .select()
     .from(rawEvents)
@@ -35,7 +36,7 @@ export async function getBatchActivity(batchId: bigint, limit = 20): Promise<Act
 
   const entries: ActivityEntry[] = [];
   for (const row of rows) {
-    const entry = humanizeEvent(row);
+    const entry = humanizeEvent(row, locale);
     if (entry) entries.push(entry);
     if (entries.length >= limit) break;
   }

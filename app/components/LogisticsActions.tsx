@@ -8,6 +8,8 @@ import { TransactionSteps, type Step } from "@/components/ui/TransactionSteps";
 import { publicClient, contractAddresses } from "@/lib/chain";
 import { getBrowserWalletClient, getConnectedAddress } from "@/lib/browserWallet";
 import { batchRegistryAbi, weighbridgeRegistryAbi, escrowAbi } from "@/lib/abis";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
 type Status = "REGISTERED" | "IN_TRANSIT" | "DELIVERED" | "RESOLVED";
 
@@ -16,13 +18,16 @@ export function LogisticsActions({
   status,
   quantityKg,
   hasReading,
+  locale,
 }: {
   batchId: string;
   status: Status;
   quantityKg: string;
   hasReading: boolean;
+  locale: Locale;
 }) {
   const router = useRouter();
+  const t = dict(locale).logisticsActions;
   const [steps, setSteps] = useState<Step[]>([]);
   const [busy, setBusy] = useState(false);
   const [showWeightInput, setShowWeightInput] = useState(false);
@@ -59,7 +64,7 @@ export function LogisticsActions({
   }
 
   const markInTransit = () =>
-    runSingleTx("Confirming pickup", (account) =>
+    runSingleTx(t.stepConfirmingPickup, (account) =>
       getBrowserWalletClient().writeContract({
         account,
         address: contractAddresses.batchRegistry,
@@ -70,7 +75,7 @@ export function LogisticsActions({
     );
 
   const markDelivered = () =>
-    runSingleTx("Confirming delivery", (account) =>
+    runSingleTx(t.stepConfirmingDelivery, (account) =>
       getBrowserWalletClient().writeContract({
         account,
         address: contractAddresses.batchRegistry,
@@ -81,7 +86,7 @@ export function LogisticsActions({
     );
 
   const settle = () =>
-    runSingleTx("Releasing payment", (account) =>
+    runSingleTx(t.stepReleasingPayment, (account) =>
       getBrowserWalletClient().writeContract({
         account,
         address: contractAddresses.escrow,
@@ -96,9 +101,9 @@ export function LogisticsActions({
     setShowWeightInput(false);
     setBusy(true);
     setSteps([
-      { label: "Check assigned device", state: "active" },
-      { label: "Assign weighbridge device", state: "pending" },
-      { label: "Submit signed reading", state: "pending" },
+      { label: t.stepCheckDevice, state: "active" },
+      { label: t.stepAssignDevice, state: "pending" },
+      { label: t.stepSubmitReading, state: "pending" },
     ]);
 
     try {
@@ -127,7 +132,7 @@ export function LogisticsActions({
         await publicClient.waitForTransactionReceipt({ hash: assignHash });
         setStep(1, { state: "done", txHash: assignHash });
       } else {
-        setStep(1, { state: "done", label: "Device already assigned" });
+        setStep(1, { state: "done", label: t.stepDeviceAssigned });
       }
 
       setStep(2, { state: "active" });
@@ -152,23 +157,23 @@ export function LogisticsActions({
     <div className="flex flex-col items-end gap-2">
       {status === "REGISTERED" && (
         <Button variant="primary" onClick={markInTransit} disabled={busy}>
-          {busy ? "Processing…" : "Confirm Pickup"}
+          {busy ? t.processing : t.confirmPickup}
         </Button>
       )}
       {status === "IN_TRANSIT" && (
         <Button variant="primary" onClick={markDelivered} disabled={busy}>
-          {busy ? "Processing…" : "Confirm Delivery"}
+          {busy ? t.processing : t.confirmDelivery}
         </Button>
       )}
       {status === "DELIVERED" && !hasReading && !showWeightInput && (
         <Button variant="primary" onClick={() => setShowWeightInput(true)} disabled={busy}>
-          Verify Weight
+          {t.verifyWeight}
         </Button>
       )}
       {status === "DELIVERED" && !hasReading && showWeightInput && (
         <div className="flex items-end gap-2">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-text-secondary">Actual weight (kg)</span>
+            <span className="text-xs text-text-secondary">{t.actualWeightLabel}</span>
             <Input
               type="number"
               value={weightKg}
@@ -178,13 +183,13 @@ export function LogisticsActions({
             />
           </div>
           <Button variant="primary" onClick={submitWeight} disabled={busy}>
-            {busy ? "Processing…" : "Submit"}
+            {busy ? t.processing : t.submit}
           </Button>
         </div>
       )}
       {status === "DELIVERED" && hasReading && (
         <Button variant="secondary" onClick={settle} disabled={busy}>
-          {busy ? "Processing…" : "Release Payment"}
+          {busy ? t.processing : t.releasePayment}
         </Button>
       )}
       <TransactionSteps steps={steps} />

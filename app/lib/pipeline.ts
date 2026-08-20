@@ -1,15 +1,21 @@
+import type { Locale } from "./i18n/locale";
+import { dict } from "./i18n/dictionary";
+
 export type PipelineStageKey = "REGISTERED" | "ESCROWED" | "IN_TRANSIT" | "DELIVERED" | "WEIGHED" | "SETTLED";
 
-export const PIPELINE_STAGES: { key: PipelineStageKey; label: string; sub: string }[] = [
-  { key: "REGISTERED", label: "Registered", sub: "Batch darj" },
-  { key: "ESCROWED", label: "Escrowed", sub: "Daam lock" },
-  { key: "IN_TRANSIT", label: "In Transit", sub: "Pickup ho gaya" },
-  { key: "DELIVERED", label: "Delivered", sub: "Pahunch gaya" },
-  { key: "WEIGHED", label: "Weighed", sub: "Wazan verify" },
-  { key: "SETTLED", label: "Settled", sub: "Bhugtan ho gaya" },
-];
-
 const ORDER: PipelineStageKey[] = ["REGISTERED", "ESCROWED", "IN_TRANSIT", "DELIVERED", "WEIGHED", "SETTLED"];
+
+export function getPipelineStages(locale: Locale): { key: PipelineStageKey; label: string }[] {
+  const t = dict(locale).pipeline;
+  return [
+    { key: "REGISTERED", label: t.registered },
+    { key: "ESCROWED", label: t.escrowed },
+    { key: "IN_TRANSIT", label: t.inTransit },
+    { key: "DELIVERED", label: t.delivered },
+    { key: "WEIGHED", label: t.weighed },
+    { key: "SETTLED", label: t.settled },
+  ];
+}
 
 /** Derives how far along the pipeline a batch is from the same data every page already loads —
  * no new state, just a single place that turns (batch, escrow, reading) into "where are we." */

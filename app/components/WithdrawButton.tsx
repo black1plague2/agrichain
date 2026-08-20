@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { formatAgri } from "@/components/ui/Numeral";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
-export function WithdrawButton({ pendingAmount }: { pendingAmount: bigint }) {
+export function WithdrawButton({ pendingAmount, locale }: { pendingAmount: bigint; locale: Locale }) {
   const router = useRouter();
+  const t = dict(locale);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export function WithdrawButton({ pendingAmount }: { pendingAmount: bigint }) {
   return (
     <div className="flex flex-col items-end gap-1">
       <Button variant="primary" onClick={withdraw} disabled={busy}>
-        {busy ? "Processing…" : `Withdraw ${formatAgri(pendingAmount)} AGRI`}
+        {busy ? t.common.processing : `${t.withdraw.action} ${formatAgri(pendingAmount)} AGRI`}
       </Button>
       {error && <p className="max-w-[220px] text-right text-xs text-danger-hover">{error}</p>}
     </div>

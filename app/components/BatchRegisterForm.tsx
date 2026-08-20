@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Field, Input, Select } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
-export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
+export function BatchRegisterForm({ farmerWallet, locale }: { farmerWallet: string; locale: Locale }) {
   const router = useRouter();
+  const t = dict(locale);
   const [crop, setCrop] = useState("wheat");
   const [quantityKg, setQuantityKg] = useState("");
   const [geohash, setGeohash] = useState("");
@@ -51,28 +54,28 @@ export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Crop">
+        <Field label={t.batchRegisterForm.cropLabel}>
           <Select value={crop} onChange={(e) => setCrop(e.target.value)}>
-            <option value="wheat">Wheat (Gehun)</option>
-            <option value="rice">Rice (Chawal)</option>
-            <option value="cotton">Cotton (Kapas)</option>
+            <option value="wheat">{t.common.crops.wheat}</option>
+            <option value="rice">{t.common.crops.rice}</option>
+            <option value="cotton">{t.common.crops.cotton}</option>
           </Select>
         </Field>
-        <Field label="Quantity (kg)">
+        <Field label={t.batchRegisterForm.quantityLabel}>
           <Input
             type="number"
             min={1}
             value={quantityKg}
             onChange={(e) => setQuantityKg(e.target.value)}
             required
-            placeholder="1000"
+            placeholder={t.batchRegisterForm.quantityPlaceholder}
           />
         </Field>
       </div>
-      <Field label="Collection Location" hint="Any text works for this deployment (geohash).">
+      <Field label={t.batchRegisterForm.locationLabel} hint={t.batchRegisterForm.locationHint}>
         <Input value={geohash} onChange={(e) => setGeohash(e.target.value)} placeholder="tdr1y" />
       </Field>
-      <Field label="Photo">
+      <Field label={t.batchRegisterForm.photoLabel}>
         <input
           type="file"
           accept="image/*"
@@ -81,7 +84,7 @@ export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
         />
       </Field>
       <Button type="submit" variant="primary" disabled={busy} className="self-start">
-        {busy ? "Registering…" : "Register Batch"}
+        {busy ? t.batchRegisterForm.submitting : t.batchRegisterForm.submit}
       </Button>
       {error && <p className="border border-danger bg-danger-tint px-3 py-2 text-sm text-danger-hover">{error}</p>}
     </form>

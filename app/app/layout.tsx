@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { getLocale, hasLocaleCookie } from "@/lib/i18n/getLocale";
+import { LanguagePicker } from "@/components/i18n/LanguagePicker";
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
@@ -20,10 +22,15 @@ export const metadata: Metadata = {
     "Verified weight, locked pricing, automated settlement — a blockchain-backed supply chain ledger for agricultural trade on Polygon.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const [locale, hasChosenLocale] = await Promise.all([getLocale(), hasLocaleCookie()]);
+
   return (
-    <html lang="en" className={`${plexSans.variable} ${plexMono.variable} h-full`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang={locale} className={`${plexSans.variable} ${plexMono.variable} h-full`}>
+      <body className="min-h-full flex flex-col">
+        {!hasChosenLocale && <LanguagePicker />}
+        {children}
+      </body>
     </html>
   );
 }

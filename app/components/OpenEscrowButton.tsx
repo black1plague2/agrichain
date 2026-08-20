@@ -7,11 +7,23 @@ import { TransactionSteps, type Step } from "@/components/ui/TransactionSteps";
 import { publicClient, contractAddresses } from "@/lib/chain";
 import { getBrowserWalletClient, getConnectedAddress } from "@/lib/browserWallet";
 import { fairPriceOracleAbi, agriTokenAbi, escrowAbi } from "@/lib/abis";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
-const STEP_LABELS = ["Connect wallet", "Read live price", "Approve payment", "Open escrow"];
-
-export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: string; crop: string; quantityKg: string }) {
+export function OpenEscrowButton({
+  batchId,
+  crop,
+  quantityKg,
+  locale,
+}: {
+  batchId: string;
+  crop: string;
+  quantityKg: string;
+  locale: Locale;
+}) {
   const router = useRouter();
+  const t = dict(locale).openEscrow;
+  const STEP_LABELS = [t.stepConnect, t.stepPrice, t.stepApprove, t.stepOpen];
   const [steps, setSteps] = useState<Step[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -77,7 +89,7 @@ export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: strin
   return (
     <div className="flex flex-col items-end gap-2">
       <Button variant="primary" onClick={openEscrow} disabled={busy} className="whitespace-nowrap">
-        {busy ? "Processing…" : "Open Escrow"}
+        {busy ? t.processing : t.open}
       </Button>
       <TransactionSteps steps={steps} />
     </div>

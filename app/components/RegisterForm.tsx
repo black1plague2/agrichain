@@ -6,6 +6,8 @@ import { RoleTabs, RoleKey } from "@/components/RoleTabs";
 import { Field, Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { connectAndSignLogin, NoWalletError } from "@/lib/wallet";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
 const DASHBOARD_PATH: Record<RoleKey, string> = {
   farmer: "/farmer",
@@ -13,8 +15,9 @@ const DASHBOARD_PATH: Record<RoleKey, string> = {
   logistics: "/logistics",
 };
 
-export function RegisterForm({ initialRole }: { initialRole: RoleKey }) {
+export function RegisterForm({ initialRole, locale }: { initialRole: RoleKey; locale: Locale }) {
   const router = useRouter();
+  const t = dict(locale);
   const [role, setRole] = useState<RoleKey>(initialRole);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -63,24 +66,24 @@ export function RegisterForm({ initialRole }: { initialRole: RoleKey }) {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
-      <RoleTabs role={role} onChange={setRole} />
+      <RoleTabs role={role} onChange={setRole} locale={locale} />
 
       {role === "farmer" && (
         <form onSubmit={submitFarmer} className="flex flex-col gap-4">
-          <Field label="Full Name">
-            <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ramesh Kumar" />
+          <Field label={t.auth.fullNameLabel}>
+            <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder={t.auth.fullNamePlaceholder} />
           </Field>
-          <Field label="Phone Number" hint="Wallet is linked to this number — no seed phrase needed.">
+          <Field label={t.auth.phoneLabel} hint={t.auth.phoneHint}>
             <Input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
               type="tel"
-              placeholder="98765 43210"
+              placeholder={t.auth.phonePlaceholder}
             />
           </Field>
           <Button type="submit" variant="primary" disabled={busy}>
-            {busy ? "Registering…" : "Register"}
+            {busy ? t.auth.registering : t.auth.registerButton}
           </Button>
         </form>
       )}
@@ -88,12 +91,10 @@ export function RegisterForm({ initialRole }: { initialRole: RoleKey }) {
       {(role === "buyer" || role === "logistics") && (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-secondary">
-            {role === "buyer"
-              ? "Connect your wallet to browse verified batches and open escrow."
-              : "Connect your wallet to manage pickups and weighbridge confirmations."}
+            {role === "buyer" ? t.auth.buyerConnectHint : t.auth.logisticsConnectHint}
           </p>
           <Button variant="primary" onClick={() => connectWallet(role)} disabled={busy}>
-            {busy ? "Connecting…" : "Connect Wallet"}
+            {busy ? t.common.connecting : t.common.connectWallet}
           </Button>
         </div>
       )}

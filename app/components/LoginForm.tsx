@@ -6,6 +6,8 @@ import { RoleTabs, RoleKey } from "@/components/RoleTabs";
 import { Field, Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { connectAndSignLogin, NoWalletError } from "@/lib/wallet";
+import { dict } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
 const DASHBOARD_PATH: Record<RoleKey, string> = {
   farmer: "/farmer",
@@ -13,8 +15,9 @@ const DASHBOARD_PATH: Record<RoleKey, string> = {
   logistics: "/logistics",
 };
 
-export function LoginForm() {
+export function LoginForm({ locale }: { locale: Locale }) {
   const router = useRouter();
+  const t = dict(locale);
   const [role, setRole] = useState<RoleKey>("farmer");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -62,28 +65,28 @@ export function LoginForm() {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
-      <RoleTabs role={role} onChange={setRole} />
+      <RoleTabs role={role} onChange={setRole} locale={locale} />
 
       {role === "farmer" && (
         <form onSubmit={submitFarmer} className="flex flex-col gap-4">
-          <Field label="Phone">
+          <Field label={t.auth.phoneLabel}>
             <Input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
               type="tel"
-              placeholder="98765 43210"
+              placeholder={t.auth.phonePlaceholder}
             />
           </Field>
           <Button type="submit" variant="primary" disabled={busy}>
-            {busy ? "Signing in…" : "Log In"}
+            {busy ? t.auth.signingIn : t.auth.logInButton}
           </Button>
         </form>
       )}
 
       {(role === "buyer" || role === "logistics") && (
         <Button variant="primary" onClick={() => connectWallet(role)} disabled={busy}>
-          {busy ? "Connecting…" : "Connect Wallet"}
+          {busy ? t.common.connecting : t.common.connectWallet}
         </Button>
       )}
 

@@ -1,16 +1,18 @@
-import { PIPELINE_STAGES, PipelineStageKey, stageIndex } from "@/lib/pipeline";
+import { getPipelineStages, PipelineStageKey, stageIndex } from "@/lib/pipeline";
+import type { Locale } from "@/lib/i18n/locale";
 
 /** Full stepper — batch's whole journey, one row, used on /verify where the batch's full story
  * is the point of the page. Carbon-style progress indicator: filled = complete, ringed = current. */
-export function PipelineTracker({ current }: { current: PipelineStageKey }) {
+export function PipelineTracker({ current, locale }: { current: PipelineStageKey; locale: Locale }) {
   const currentIdx = stageIndex(current);
+  const stages = getPipelineStages(locale);
 
   return (
     <div className="flex w-full items-start">
-      {PIPELINE_STAGES.map((stage, i) => {
+      {stages.map((stage, i) => {
         const done = i < currentIdx;
         const active = i === currentIdx;
-        const isLast = i === PIPELINE_STAGES.length - 1;
+        const isLast = i === stages.length - 1;
 
         return (
           <div key={stage.key} className={`flex flex-1 flex-col items-center ${i === 0 ? "items-start" : isLast ? "items-end" : ""}`}>
@@ -33,7 +35,6 @@ export function PipelineTracker({ current }: { current: PipelineStageKey }) {
               <p className={`text-xs font-medium ${active ? "text-accent" : done ? "text-text-primary" : "text-text-placeholder"}`}>
                 {stage.label}
               </p>
-              <p className="text-[11px] text-text-placeholder">{stage.sub}</p>
             </div>
           </div>
         );
@@ -44,13 +45,14 @@ export function PipelineTracker({ current }: { current: PipelineStageKey }) {
 
 /** Compact inline version — a single line of small dots, for list rows on /farmer, /buyer,
  * /logistics where full labels would be too much per-row. */
-export function PipelineDots({ current }: { current: PipelineStageKey }) {
+export function PipelineDots({ current, locale }: { current: PipelineStageKey; locale: Locale }) {
   const currentIdx = stageIndex(current);
-  const currentStage = PIPELINE_STAGES[currentIdx];
+  const stages = getPipelineStages(locale);
+  const currentStage = stages[currentIdx];
 
   return (
     <div className="flex items-center gap-1.5" title={currentStage.label}>
-      {PIPELINE_STAGES.map((stage, i) => (
+      {stages.map((stage, i) => (
         <span
           key={stage.key}
           className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${

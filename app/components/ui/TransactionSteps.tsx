@@ -1,9 +1,9 @@
 "use client";
 
+import { explorerTxUrl } from "@/lib/chain";
+
 export type StepState = "pending" | "active" | "done" | "error";
 export type Step = { label: string; state: StepState; txHash?: string; error?: string };
-
-const AMOY_EXPLORER = "https://amoy.polygonscan.com";
 
 /**
  * Shows every step of a multi-transaction flow live, in-app — not left to MetaMask's own popups,
@@ -42,14 +42,23 @@ export function TransactionSteps({ steps }: { steps: Step[] }) {
             {step.label}
           </span>
           {step.txHash && (
-            <a
-              href={`${AMOY_EXPLORER}/tx/${step.txHash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-auto flex-shrink-0 text-xs text-accent underline"
-            >
-              view tx ↗
-            </a>
+            explorerTxUrl(step.txHash) ? (
+              <a
+                href={explorerTxUrl(step.txHash)!}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-auto flex-shrink-0 text-xs text-accent underline"
+              >
+                view tx ↗
+              </a>
+            ) : (
+              <span
+                className="ml-auto flex-shrink-0 font-mono text-[11px] text-text-placeholder"
+                title="Local demo chain — no public block explorer. This is still the real transaction hash."
+              >
+                tx {step.txHash.slice(0, 10)}…
+              </span>
+            )
           )}
           {step.error && <span className="ml-auto flex-shrink-0 text-xs text-danger">{step.error}</span>}
         </li>

@@ -8,12 +8,18 @@ import { PipelineTracker } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { explorerAddressUrl } from "@/lib/chain";
+import { getLocale } from "@/lib/i18n/getLocale";
+import { dict } from "@/lib/i18n/dictionary";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
-const AMOY_EXPLORER = "https://amoy.polygonscan.com";
 const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
 
 export default async function VerifyPage({ params }: { params: Promise<{ batchId: string }> }) {
   const { batchId } = await params;
+  const locale = await getLocale();
+  const t = dict(locale).verifyPage;
+  const crops = dict(locale).common.crops;
   let story;
   try {
     story = await getBatchStory(BigInt(batchId));
@@ -35,39 +41,45 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
     settled: !!escrow?.settled,
   });
 
+  const farmerWalletExplorerUrl = explorerAddressUrl(batch.farmerWallet);
+  const cropName = crops[batch.crop as keyof typeof crops] ?? batch.crop;
+
   return (
     <div className="flex flex-1 flex-col items-center bg-layer px-6 py-12 sm:px-10">
       <AutoRefresh />
       <div className="w-full max-w-3xl">
+        <div className="mb-2 flex justify-end">
+          <LanguageSwitcher locale={locale} />
+        </div>
         <div className="mb-6 text-center">
           <Link href="/" className="text-2xl font-semibold text-text-primary">
             AgriChain
           </Link>
-          <p className="mt-1 text-xs uppercase tracking-wide text-text-placeholder">Public Batch Record</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-text-placeholder">{t.publicRecordTag}</p>
         </div>
 
-        <Panel title="Where This Batch Is Right Now" className="animate-rise mb-4">
-          <PipelineTracker current={pipelineStage} />
+        <Panel title={t.whereRightNow} className="animate-rise mb-4">
+          <PipelineTracker current={pipelineStage} locale={locale} />
         </Panel>
 
-        <Panel title={`Batch #${batchId}`} stamp={batch.status} className="animate-rise">
+        <Panel title={`${t.batchPrefix}${batchId}`} stamp={batch.status} className="animate-rise">
           <div className="flex flex-col gap-4">
             {batch.ipfsPhotoHash && batch.ipfsPhotoHash !== "no-photo" && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={`${IPFS_GATEWAY}/${batch.ipfsPhotoHash}`}
-                alt={`${batch.crop} batch photo`}
+                alt={`${cropName} batch photo`}
                 className="border border-border-subtle object-cover"
               />
             )}
 
             <div className="grid grid-cols-2 gap-4 rule pb-4">
               <div>
-                <p className="text-xs uppercase tracking-wide text-text-placeholder">Crop</p>
-                <p className="text-xl font-semibold capitalize text-text-primary">{batch.crop}</p>
+                <p className="text-xs uppercase tracking-wide text-text-placeholder">{t.crop}</p>
+                <p className="text-xl font-semibold text-text-primary">{cropName}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-text-placeholder">Registered Quantity</p>
+                <p className="text-xs uppercase tracking-wide text-text-placeholder">{t.registeredQuantity}</p>
                 <p className="text-xl font-semibold text-text-primary">
                   <Numeral>{formatKg(batch.quantityKg)} kg</Numeral>
                 </p>
@@ -75,27 +87,27 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
             </div>
 
             <div className="rule flex items-center justify-between pb-4">
-              <span className="text-xs uppercase tracking-wide text-text-placeholder">Status</span>
-              <StatusDot status={batch.status as BatchStatusKey} />
+              <span className="text-xs uppercase tracking-wide text-text-placeholder">{t.status}</span>
+              <StatusDot status={batch.status as BatchStatusKey} locale={locale} />
             </div>
 
             {reading && (
               <div className="rule flex items-center justify-between pb-4">
-                <span className="text-xs uppercase tracking-wide text-text-placeholder">Weighbridge Verified</span>
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">{t.weighbridgeVerified}</span>
                 <Numeral className="font-semibold text-text-primary">{formatKg(reading.weightKg)} kg</Numeral>
               </div>
             )}
 
             {escrow && (
               <div className="rule flex items-center justify-between pb-4">
-                <span className="text-xs uppercase tracking-wide text-text-placeholder">Locked Price</span>
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">{t.lockedPrice}</span>
                 <Numeral className="font-semibold text-text-primary">₹{formatAgri(escrow.snapshotPrice)}/kg</Numeral>
               </div>
             )}
 
             {escrow?.settled && (
               <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-wide text-text-placeholder">Farmer Paid</span>
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">{t.farmerPaid}</span>
                 <Numeral className="text-lg font-semibold text-success">
                   {formatAgri(escrow.farmerPayout ?? 0n)} AGRI
                 </Numeral>
@@ -104,36 +116,43 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
 
             {deviationBps !== null && deviationBps > 500 && (
               <p className="border border-danger bg-danger-tint px-3 py-2 text-xs text-danger">
-                Delivered weight deviated {(deviationBps / 100).toFixed(1)}% from registered quantity — logistics
-                penalty applied, farmer paid for verified weight only.
+                {t.deviationWarning((deviationBps / 100).toFixed(1))}
               </p>
             )}
 
             {latestPrice && (
-              <p className="text-xs text-text-placeholder">Price source: {latestPrice.sourceUri}</p>
+              <p className="text-xs text-text-placeholder">
+                {t.priceSource} {latestPrice.sourceUri}
+              </p>
             )}
           </div>
         </Panel>
 
         <div className="mt-4">
-          <ActivityFeed batchId={batchId} title="This Batch's Full Story, In Order" />
+          <ActivityFeed batchId={batchId} title={t.fullStoryTitle} locale={locale} />
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <a
-            href={`${AMOY_EXPLORER}/address/${batch.farmerWallet}`}
-            target="_blank"
-            rel="noreferrer"
-            className="border border-border-subtle bg-bg px-3 py-2 text-xs text-text-secondary hover:bg-layer"
-          >
-            View farmer wallet on explorer ↗
-          </a>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {farmerWalletExplorerUrl ? (
+            <a
+              href={farmerWalletExplorerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="border border-border-subtle bg-bg px-3 py-2 text-xs text-text-secondary hover:bg-layer"
+            >
+              {t.viewFarmerWallet}
+            </a>
+          ) : (
+            <span
+              className="border border-border-subtle bg-bg px-3 py-2 font-mono text-xs text-text-placeholder"
+              title="Local demo chain — no public block explorer. This is still the farmer's real on-chain address."
+            >
+              {batch.farmerWallet}
+            </span>
+          )}
         </div>
 
-        <p className="mt-6 text-center text-xs text-text-placeholder">
-          Reads shown here are cached for speed. This deployment doesn&apos;t yet run a live
-          on-chain cross-check on every page load — planned as a future integrity feature.
-        </p>
+        <p className="mt-6 text-center text-xs text-text-placeholder">{t.cacheDisclaimer}</p>
       </div>
     </div>
   );

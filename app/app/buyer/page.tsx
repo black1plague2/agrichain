@@ -11,10 +11,15 @@ import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { AnalyticsPanel } from "@/components/AnalyticsPanel";
+import { getLocale } from "@/lib/i18n/getLocale";
+import { dict } from "@/lib/i18n/dictionary";
 
 export default async function BuyerPage() {
   const session = await getSession();
   if (!session || session.role !== "buyer") redirect("/login");
+  const locale = await getLocale();
+  const t = dict(locale);
+  const crops = t.common.crops;
 
   const [available, myEscrows, analytics] = await Promise.all([
     getAvailableBatches(),
@@ -29,27 +34,28 @@ export default async function BuyerPage() {
   return (
     <div className="flex flex-1 flex-col">
       <AutoRefresh />
-      <Header role={`Buyer — ${session.wallet.slice(0, 10)}…`} />
+      <Header role={`${t.roleTabs.buyer} — ${session.wallet.slice(0, 10)}…`} locale={locale} />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">Verified Batches</h1>
-          <p className="text-xs text-text-placeholder">Verified batches available for procurement</p>
+          <h1 className="text-2xl font-semibold text-text-primary">{t.buyerPage.heading}</h1>
+          <p className="text-xs text-text-placeholder">{t.buyerPage.subheading}</p>
         </div>
 
-        <AnalyticsPanel data={analytics} />
+        <AnalyticsPanel data={analytics} locale={locale} />
 
-        <Panel title="Available Now" stamp={`${available.length} batches`}>
+        <Panel title={t.buyerPage.availablePanelTitle} stamp={`${available.length} batches`}>
           {available.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-placeholder">No batches available right now.</p>
+            <p className="py-6 text-center text-sm text-text-placeholder">{t.buyerPage.availableEmpty}</p>
           ) : (
             <div className="flex flex-col">
               {available.map((b) => {
                 const price = priceByCrop.get(b.crop);
+                const cropName = crops[b.crop as keyof typeof crops] ?? b.crop;
                 return (
                   <div key={b.batchId.toString()} className="rule flex flex-wrap items-center justify-between gap-4 py-4">
                     <div>
-                      <p className="text-lg font-semibold capitalize text-text-primary">
-                        {b.crop} <span className="text-text-placeholder">#{b.batchId.toString()}</span>
+                      <p className="text-lg font-semibold text-text-primary">
+                        {cropName} <span className="text-text-placeholder">#{b.batchId.toString()}</span>
                       </p>
                       <p className="text-sm text-text-secondary">
                         <Numeral>{formatKg(b.quantityKg)} kg</Numeral>
@@ -66,9 +72,10 @@ export default async function BuyerPage() {
                         batchId={b.batchId.toString()}
                         crop={b.crop}
                         quantityKg={b.quantityKg.toString()}
+                        locale={locale}
                       />
                     ) : (
-                      <span className="text-xs text-text-placeholder">no price set for this crop yet</span>
+                      <span className="text-xs text-text-placeholder">{t.buyerPage.noPriceSet}</span>
                     )}
                   </div>
                 );
@@ -77,16 +84,16 @@ export default async function BuyerPage() {
           )}
         </Panel>
 
-        <Panel title="Your Settlement History" stamp={`${myEscrows.length} total`}>
+        <Panel title={t.buyerPage.historyPanelTitle} stamp={`${myEscrows.length} total`}>
           {myEscrows.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-placeholder">No escrows opened yet.</p>
+            <p className="py-6 text-center text-sm text-text-placeholder">{t.buyerPage.historyEmpty}</p>
           ) : (
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="rule-strong text-xs font-medium uppercase tracking-wide text-text-placeholder">
-                  <th className="py-2 pr-3">Batch</th>
-                  <th className="py-2 pr-3">Deposit</th>
-                  <th className="py-2 pr-3">Journey</th>
+                  <th className="py-2 pr-3">{t.buyerPage.colBatch}</th>
+                  <th className="py-2 pr-3">{t.buyerPage.colDeposit}</th>
+                  <th className="py-2 pr-3">{t.buyerPage.colJourney}</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,6 +113,7 @@ export default async function BuyerPage() {
                           hasReading: !!reading,
                           settled: escrow.settled,
                         })}
+                        locale={locale}
                       />
                     </td>
                   </tr>
@@ -115,7 +123,7 @@ export default async function BuyerPage() {
           )}
         </Panel>
 
-        <ActivityFeed title="Platform Activity" />
+        <ActivityFeed title={t.activityFeed.defaultTitle} locale={locale} />
       </main>
     </div>
   );
