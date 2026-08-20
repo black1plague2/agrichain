@@ -1,0 +1,21 @@
+# Node / Next.js
+app/node_modules/
+app/.next/
+app/out/
+app/.env
+app/.env.local
+npm-debug.log*
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+contracts/.env
+# Vendored deps — reinstall with: forge install (reads remappings from foundry.toml)
+contracts/lib/
+
+# Editors / OS
+.DS_Store
+.vscode/
+*.log
+contracts/broadcast/

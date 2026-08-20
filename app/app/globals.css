@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f4efe2;
+  --paper-raised: #ece3cd;
+  --paper-deep: #e3d8bd;
+  --ink: #211c16;
+  --ink-soft: #5b5346;
+  --ink-faint: #a89d87;
+  --mustard: #c68e1d;
+  --mustard-deep: #96690f;
+  --mustard-tint: #f0dfae;
+  --terracotta: #b1502c;
+  --terracotta-deep: #843b20;
+  --terracotta-tint: #ecd2c4;
+  --line: #d3c6a4;
+  --line-strong: #211c16;
+
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-work-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-mustard: var(--mustard);
+  --color-mustard-deep: var(--mustard-deep);
+  --color-mustard-tint: var(--mustard-tint);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-deep: var(--terracotta-deep);
+  --color-terracotta-tint: var(--terracotta-tint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      color-mix(in srgb, var(--ink) 3%, transparent) 28px
+    ),
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 0);
+  background-size: 100% 28px, 3px 3px;
+}
+
+::selection {
+  background-color: var(--mustard);
+  color: var(--ink);
+}
+
+/* Numerals: money, weight, ids — always monospace, tabular, like a ticket printout. */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Hairline ledger rule between rows. */
+.rule {
+  border-bottom: 1px solid var(--line);
+}
+
+.rule-strong {
+  border-bottom: 1.5px solid var(--line-strong);
+}
+
+/* Status dot, single color, no badge pill. */
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.4) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.96) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+.animate-stamp {
+  animation: stamp-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
