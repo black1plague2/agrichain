@@ -7,6 +7,7 @@ import { StatusDot, BatchStatusKey } from "@/components/ui/StatusDot";
 import { PipelineTracker } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 const AMOY_EXPLORER = "https://amoy.polygonscan.com";
 const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
@@ -35,15 +36,14 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
   });
 
   return (
-    <div className="flex flex-1 flex-col items-center px-6 py-12 sm:px-10">
+    <div className="flex flex-1 flex-col items-center bg-layer px-6 py-12 sm:px-10">
+      <AutoRefresh />
       <div className="w-full max-w-2xl">
         <div className="mb-6 text-center">
-          <Link href="/" className="font-display text-2xl italic">
+          <Link href="/" className="text-2xl font-semibold text-text-primary">
             AgriChain
           </Link>
-          <p className="mt-1 font-mono text-xs uppercase tracking-[0.15em] text-ink-faint">
-            Consumer Verification Ticket
-          </p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-text-placeholder">Public Batch Record</p>
         </div>
 
         <Panel title="Where This Batch Is Right Now" className="animate-rise mb-4">
@@ -57,68 +57,60 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
               <img
                 src={`${IPFS_GATEWAY}/${batch.ipfsPhotoHash}`}
                 alt={`${batch.crop} batch photo`}
-                className="border-[1.5px] border-ink object-cover"
+                className="border border-border-subtle object-cover"
               />
             )}
 
             <div className="grid grid-cols-2 gap-4 rule pb-4">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">Fasal / Crop</p>
-                <p className="font-display text-xl capitalize">{batch.crop}</p>
+                <p className="text-xs uppercase tracking-wide text-text-placeholder">Crop</p>
+                <p className="text-xl font-semibold capitalize text-text-primary">{batch.crop}</p>
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">Registered</p>
-                <p className="font-display text-xl">
+                <p className="text-xs uppercase tracking-wide text-text-placeholder">Registered Quantity</p>
+                <p className="text-xl font-semibold text-text-primary">
                   <Numeral>{formatKg(batch.quantityKg)} kg</Numeral>
                 </p>
               </div>
             </div>
 
             <div className="rule flex items-center justify-between pb-4">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">Status</span>
+              <span className="text-xs uppercase tracking-wide text-text-placeholder">Status</span>
               <StatusDot status={batch.status as BatchStatusKey} />
             </div>
 
             {reading && (
               <div className="rule flex items-center justify-between pb-4">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-                  Weighbridge Verified
-                </span>
-                <Numeral>{formatKg(reading.weightKg)} kg</Numeral>
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">Weighbridge Verified</span>
+                <Numeral className="font-semibold text-text-primary">{formatKg(reading.weightKg)} kg</Numeral>
               </div>
             )}
 
             {escrow && (
               <div className="rule flex items-center justify-between pb-4">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-                  Locked Price
-                </span>
-                <Numeral>₹{formatAgri(escrow.snapshotPrice)}/kg</Numeral>
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">Locked Price</span>
+                <Numeral className="font-semibold text-text-primary">₹{formatAgri(escrow.snapshotPrice)}/kg</Numeral>
               </div>
             )}
 
             {escrow?.settled && (
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-                  Farmer Paid
-                </span>
-                <Numeral className="text-lg font-semibold text-mustard-deep">
+                <span className="text-xs uppercase tracking-wide text-text-placeholder">Farmer Paid</span>
+                <Numeral className="text-lg font-semibold text-success">
                   {formatAgri(escrow.farmerPayout ?? 0n)} AGRI
                 </Numeral>
               </div>
             )}
 
             {deviationBps !== null && deviationBps > 500 && (
-              <p className="border-[1.5px] border-terracotta bg-terracotta-tint px-3 py-2 text-xs text-terracotta-deep">
+              <p className="border border-danger bg-danger-tint px-3 py-2 text-xs text-danger">
                 Delivered weight deviated {(deviationBps / 100).toFixed(1)}% from registered quantity — logistics
                 penalty applied, farmer paid for verified weight only.
               </p>
             )}
 
             {latestPrice && (
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-                Mandi price source: {latestPrice.sourceUri}
-              </p>
+              <p className="text-xs text-text-placeholder">Price source: {latestPrice.sourceUri}</p>
             )}
           </div>
         </Panel>
@@ -132,15 +124,15 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
             href={`${AMOY_EXPLORER}/address/${batch.farmerWallet}`}
             target="_blank"
             rel="noreferrer"
-            className="border-[1.5px] border-ink px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink-soft hover:bg-paper-deep"
+            className="border border-border-subtle bg-bg px-3 py-2 text-xs text-text-secondary hover:bg-layer"
           >
-            Farmer wallet ↗
+            View farmer wallet on explorer ↗
           </a>
         </div>
 
-        <p className="mt-6 text-center text-xs text-ink-faint">
-          Reads shown here are cached for speed. This build doesn&apos;t yet run a live on-chain
-          cross-check — that&apos;s TamperWatch, a stretch item, not built in this MVP.
+        <p className="mt-6 text-center text-xs text-text-placeholder">
+          Reads shown here are cached for speed. This deployment doesn&apos;t yet run a live
+          on-chain cross-check on every page load — planned as a future integrity feature.
         </p>
       </div>
     </div>

@@ -75,19 +75,19 @@ export function LoginForm() {
               placeholder="98765 43210"
             />
           </Field>
-          <Button type="submit" variant="mustard" disabled={busy}>
-            {busy ? "Ruko…" : "Log In Karein"}
+          <Button type="submit" variant="primary" disabled={busy}>
+            {busy ? "Signing in…" : "Log In"}
           </Button>
         </form>
       )}
 
       {(role === "buyer" || role === "logistics") && (
-        <Button variant="mustard" onClick={() => connectWallet(role)} disabled={busy}>
-          {busy ? "Connecting…" : "Wallet Connect Karein"}
+        <Button variant="primary" onClick={() => connectWallet(role)} disabled={busy}>
+          {busy ? "Connecting…" : "Connect Wallet"}
         </Button>
       )}
 
-      {error && <p className="border-[1.5px] border-terracotta bg-terracotta-tint px-3 py-2 text-sm text-terracotta-deep">{error}</p>}
+      {error && <p className="border border-danger bg-danger-tint px-3 py-2 text-sm text-danger-hover">{error}</p>}
     </div>
   );
 }

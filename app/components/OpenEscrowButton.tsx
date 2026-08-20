@@ -3,23 +3,32 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { TransactionSteps, type Step } from "@/components/ui/TransactionSteps";
 import { publicClient, contractAddresses } from "@/lib/chain";
 import { getBrowserWalletClient, getConnectedAddress } from "@/lib/browserWallet";
 import { fairPriceOracleAbi, agriTokenAbi, escrowAbi } from "@/lib/abis";
 
+const STEP_LABELS = ["Connect wallet", "Read live price", "Approve payment", "Open escrow"];
+
 export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: string; crop: string; quantityKg: string }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  function setStep(i: number, patch: Partial<Step>) {
+    setSteps((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  }
 
   async function openEscrow() {
-    setError(null);
+    setBusy(true);
+    setSteps(STEP_LABELS.map((label, i) => ({ label, state: i === 0 ? "active" : "pending" })));
+
     try {
-      setBusy("Connecting wallet…");
       const buyer = await getConnectedAddress();
       const wallet = getBrowserWalletClient();
+      setStep(0, { state: "done" });
 
-      setBusy("Reading live price…");
+      setStep(1, { state: "active" });
       const [price] = await publicClient.readContract({
         address: contractAddresses.fairPriceOracle,
         abi: fairPriceOracleAbi,
@@ -27,8 +36,9 @@ export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: strin
         args: [crop],
       });
       const depositAmount = BigInt(quantityKg) * price;
+      setStep(1, { state: "done" });
 
-      setBusy("Approving AGRI spend…");
+      setStep(2, { state: "active" });
       const approveHash = await wallet.writeContract({
         account: buyer,
         address: contractAddresses.agriToken,
@@ -37,8 +47,9 @@ export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: strin
         args: [contractAddresses.escrow, depositAmount],
       });
       await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      setStep(2, { state: "done", txHash: approveHash });
 
-      setBusy("Opening escrow…");
+      setStep(3, { state: "active" });
       const openHash = await wallet.writeContract({
         account: buyer,
         address: contractAddresses.escrow,
@@ -47,21 +58,28 @@ export function OpenEscrowButton({ batchId, crop, quantityKg }: { batchId: strin
         args: [BigInt(batchId), price],
       });
       await publicClient.waitForTransactionReceipt({ hash: openHash });
+      setStep(3, { state: "done", txHash: openHash });
 
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setSteps((prev) => {
+        const activeIdx = prev.findIndex((s) => s.state === "active");
+        const i = activeIdx === -1 ? prev.length - 1 : activeIdx;
+        return prev.map((s, idx) =>
+          idx === i ? { ...s, state: "error", error: err instanceof Error ? err.message : String(err) } : s
+        );
+      });
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <Button variant="mustard" onClick={openEscrow} disabled={!!busy} className="whitespace-nowrap">
-        {busy ?? "Escrow Kholein"}
+    <div className="flex flex-col items-end gap-2">
+      <Button variant="primary" onClick={openEscrow} disabled={busy} className="whitespace-nowrap">
+        {busy ? "Processing…" : "Open Escrow"}
       </Button>
-      {error && <p className="max-w-[220px] text-right text-xs text-terracotta-deep">{error}</p>}
+      <TransactionSteps steps={steps} />
     </div>
   );
 }

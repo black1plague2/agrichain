@@ -10,6 +10,7 @@ import { WithdrawButton } from "@/components/WithdrawButton";
 import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 export default async function FarmerPage() {
   const session = await getSession();
@@ -23,14 +24,18 @@ export default async function FarmerPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <Header role={`Kisan — ${session.name ?? session.wallet.slice(0, 8)}`} />
+      <AutoRefresh />
+      <Header role={`Farmer — ${session.name ?? session.wallet.slice(0, 8)}`} />
       <main className="flex flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h1 className="font-display text-3xl italic">Aapke Batches</h1>
+          <div>
+            <h1 className="text-2xl font-semibold text-text-primary">Your Batches</h1>
+            <p className="text-xs text-text-placeholder">Aapke batches</p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="border-[1.5px] border-ink bg-mustard-tint px-4 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">Balance</span>
-              <div className="font-mono text-lg font-semibold">
+            <div className="border border-border-subtle bg-layer px-4 py-2">
+              <span className="text-xs text-text-secondary">Balance</span>
+              <div className="tabular text-lg font-semibold text-text-primary">
                 <Numeral>{formatAgri(balance)}</Numeral> AGRI
               </div>
             </div>
@@ -38,21 +43,21 @@ export default async function FarmerPage() {
           </div>
         </div>
 
-        <Panel title="Naya Batch Register Karein">
+        <Panel title="Register New Batch">
           <BatchRegisterForm farmerWallet={session.wallet} />
         </Panel>
 
         <Panel title="Batch History" stamp={`${batches.length} total`}>
           {batches.length === 0 ? (
-            <p className="py-6 text-center text-sm text-ink-faint">Abhi tak koi batch register nahi hua.</p>
+            <p className="py-6 text-center text-sm text-text-placeholder">No batches registered yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="rule-strong font-mono text-[10px] uppercase tracking-widest text-ink-faint">
+                  <tr className="rule-strong text-xs font-medium uppercase tracking-wide text-text-placeholder">
                     <th className="py-2 pr-3">ID</th>
-                    <th className="py-2 pr-3">Fasal</th>
-                    <th className="py-2 pr-3">Wazan</th>
+                    <th className="py-2 pr-3">Crop</th>
+                    <th className="py-2 pr-3">Quantity</th>
                     <th className="py-2 pr-3">Journey</th>
                     <th className="py-2 pr-3">QR</th>
                   </tr>
@@ -88,7 +93,7 @@ export default async function FarmerPage() {
           )}
         </Panel>
 
-        <ActivityFeed title="Platform Activity — Kya Ho Raha Hai" />
+        <ActivityFeed title="Platform Activity" />
       </main>
     </div>
   );

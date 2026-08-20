@@ -1,16 +1,18 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export function Header({ role }: { role?: string }) {
   return (
-    <header className="rule-strong flex items-center justify-between px-6 py-4">
-      <Link href="/" className="flex items-baseline gap-2">
-        <span className="font-display text-xl italic text-ink">AgriChain</span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-faint">Amoy Testnet</span>
+    <header className="flex items-center justify-between border-b border-border-subtle bg-text-primary px-6 py-3.5">
+      <Link href="/" className="flex items-baseline gap-3">
+        <span className="text-lg font-semibold tracking-tight text-text-on-color">AgriChain</span>
+        <span className="hidden text-xs text-text-placeholder sm:inline">Supply Chain Platform</span>
       </Link>
       {role && (
-        <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-          Signed in — {role}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-text-placeholder">{role}</span>
+          <LogoutButton />
+        </div>
       )}
     </header>
   );

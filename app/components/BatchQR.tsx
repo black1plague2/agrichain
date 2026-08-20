@@ -12,9 +12,9 @@ export function BatchQR({ batchId, size = 96 }: { batchId: string; size?: number
     QRCode.toCanvas(canvasRef.current, url, {
       width: size,
       margin: 1,
-      color: { dark: "#211c16", light: "#f4efe2" },
+      color: { dark: "#161616", light: "#ffffff" },
     });
   }, [batchId, size]);
 
-  return <canvas ref={canvasRef} className="border-[1.5px] border-ink" />;
+  return <canvas ref={canvasRef} className="border border-border-subtle" />;
 }

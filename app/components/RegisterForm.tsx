@@ -67,10 +67,10 @@ export function RegisterForm({ initialRole }: { initialRole: RoleKey }) {
 
       {role === "farmer" && (
         <form onSubmit={submitFarmer} className="flex flex-col gap-4">
-          <Field label="Naam / Name">
+          <Field label="Full Name">
             <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ramesh Kumar" />
           </Field>
-          <Field label="Phone" hint="Aapka wallet is number se juda rahega — koi seed phrase yaad nahi rakhni.">
+          <Field label="Phone Number" hint="Wallet is linked to this number — no seed phrase needed.">
             <Input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -79,26 +79,26 @@ export function RegisterForm({ initialRole }: { initialRole: RoleKey }) {
               placeholder="98765 43210"
             />
           </Field>
-          <Button type="submit" variant="mustard" disabled={busy}>
-            {busy ? "Ruko…" : "Register Karein"}
+          <Button type="submit" variant="primary" disabled={busy}>
+            {busy ? "Registering…" : "Register"}
           </Button>
         </form>
       )}
 
       {(role === "buyer" || role === "logistics") && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-ink-soft">
+          <p className="text-sm text-text-secondary">
             {role === "buyer"
               ? "Connect your wallet to browse verified batches and open escrow."
               : "Connect your wallet to manage pickups and weighbridge confirmations."}
           </p>
-          <Button variant="mustard" onClick={() => connectWallet(role)} disabled={busy}>
-            {busy ? "Connecting…" : "Wallet Connect Karein"}
+          <Button variant="primary" onClick={() => connectWallet(role)} disabled={busy}>
+            {busy ? "Connecting…" : "Connect Wallet"}
           </Button>
         </div>
       )}
 
-      {error && <p className="border-[1.5px] border-terracotta bg-terracotta-tint px-3 py-2 text-sm text-terracotta-deep">{error}</p>}
+      {error && <p className="border border-danger bg-danger-tint px-3 py-2 text-sm text-danger-hover">{error}</p>}
     </div>
   );
 }

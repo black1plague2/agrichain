@@ -11,27 +11,20 @@ export function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">{label}</span>
+      <span className="text-xs font-medium text-text-secondary">{label}</span>
       {children}
-      {hint && <span className="text-xs text-ink-faint">{hint}</span>}
+      {hint && <span className="text-xs text-text-placeholder">{hint}</span>}
     </label>
   );
 }
 
+const fieldClasses =
+  "border-0 border-b-2 border-border-strong bg-layer px-3 py-2.5 font-body text-sm text-text-primary outline-none placeholder:text-text-placeholder focus:border-accent";
+
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className={`border-[1.5px] border-ink bg-paper px-3 py-2.5 font-body text-sm text-ink outline-none placeholder:text-ink-faint focus:bg-paper-raised ${props.className ?? ""}`}
-    />
-  );
+  return <input {...props} className={`${fieldClasses} ${props.className ?? ""}`} />;
 }
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className={`border-[1.5px] border-ink bg-paper px-3 py-2.5 font-body text-sm text-ink outline-none focus:bg-paper-raised ${props.className ?? ""}`}
-    />
-  );
+  return <select {...props} className={`${fieldClasses} ${props.className ?? ""}`} />;
 }

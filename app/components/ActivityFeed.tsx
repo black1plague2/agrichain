@@ -53,22 +53,22 @@ export function ActivityFeed({ batchId, title = "Live Activity" }: { batchId?: s
   return (
     <Panel title={title} stamp="live · updates every 4s">
       {entries.length === 0 ? (
-        <p className="py-4 text-center text-sm text-ink-faint">Abhi tak koi activity nahi hai.</p>
+        <p className="py-4 text-center text-sm text-text-placeholder">No activity yet.</p>
       ) : (
         <ul className="flex flex-col gap-2.5">
           {entries.map((e) => (
             <li key={e.id} className="rule flex items-start justify-between gap-3 pb-2.5 text-sm last:border-0 last:pb-0">
               <span className="flex items-start gap-2">
                 <span aria-hidden>{e.icon}</span>
-                <span className="text-ink-soft">{e.text}</span>
+                <span className="text-text-secondary">{e.text}</span>
               </span>
-              <span className="flex flex-shrink-0 items-center gap-2 font-mono text-[10px] text-ink-faint">
+              <span className="flex flex-shrink-0 items-center gap-2 text-xs text-text-placeholder">
                 {relativeTime(e.processedAt)}
                 <a
                   href={`${AMOY_EXPLORER}/tx/${e.txHash}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="underline hover:text-terracotta"
+                  className="text-accent underline"
                   title="View on block explorer"
                 >
                   proof ↗

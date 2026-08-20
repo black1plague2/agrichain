@@ -8,6 +8,7 @@ import { OpenEscrowButton } from "@/components/OpenEscrowButton";
 import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 export default async function BuyerPage() {
   const session = await getSession();
@@ -21,13 +22,17 @@ export default async function BuyerPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <Header role={`Kharidar — ${session.wallet.slice(0, 10)}…`} />
+      <AutoRefresh />
+      <Header role={`Buyer — ${session.wallet.slice(0, 10)}…`} />
       <main className="flex flex-1 flex-col gap-6 px-6 py-8 sm:px-10">
-        <h1 className="font-display text-3xl italic">Verified Batches</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-text-primary">Verified Batches</h1>
+          <p className="text-xs text-text-placeholder">Verified batches available for procurement</p>
+        </div>
 
         <Panel title="Available Now" stamp={`${available.length} batches`}>
           {available.length === 0 ? (
-            <p className="py-6 text-center text-sm text-ink-faint">Abhi koi batch available nahi hai.</p>
+            <p className="py-6 text-center text-sm text-text-placeholder">No batches available right now.</p>
           ) : (
             <div className="flex flex-col">
               {available.map((b) => {
@@ -35,10 +40,10 @@ export default async function BuyerPage() {
                 return (
                   <div key={b.batchId.toString()} className="rule flex flex-wrap items-center justify-between gap-4 py-4">
                     <div>
-                      <p className="font-display text-lg capitalize">
-                        {b.crop} <span className="text-ink-faint">#{b.batchId.toString()}</span>
+                      <p className="text-lg font-semibold capitalize text-text-primary">
+                        {b.crop} <span className="text-text-placeholder">#{b.batchId.toString()}</span>
                       </p>
-                      <p className="text-sm text-ink-soft">
+                      <p className="text-sm text-text-secondary">
                         <Numeral>{formatKg(b.quantityKg)} kg</Numeral>
                         {price && (
                           <>
@@ -55,7 +60,7 @@ export default async function BuyerPage() {
                         quantityKg={b.quantityKg.toString()}
                       />
                     ) : (
-                      <span className="text-xs text-ink-faint">no price set for this crop yet</span>
+                      <span className="text-xs text-text-placeholder">no price set for this crop yet</span>
                     )}
                   </div>
                 );
@@ -64,13 +69,13 @@ export default async function BuyerPage() {
           )}
         </Panel>
 
-        <Panel title="Aapka Settlement History" stamp={`${myEscrows.length} total`}>
+        <Panel title="Your Settlement History" stamp={`${myEscrows.length} total`}>
           {myEscrows.length === 0 ? (
-            <p className="py-6 text-center text-sm text-ink-faint">Abhi tak koi escrow nahi khula.</p>
+            <p className="py-6 text-center text-sm text-text-placeholder">No escrows opened yet.</p>
           ) : (
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="rule-strong font-mono text-[10px] uppercase tracking-widest text-ink-faint">
+                <tr className="rule-strong text-xs font-medium uppercase tracking-wide text-text-placeholder">
                   <th className="py-2 pr-3">Batch</th>
                   <th className="py-2 pr-3">Deposit</th>
                   <th className="py-2 pr-3">Journey</th>
@@ -102,7 +107,7 @@ export default async function BuyerPage() {
           )}
         </Panel>
 
-        <ActivityFeed title="Platform Activity — Kya Ho Raha Hai" />
+        <ActivityFeed title="Platform Activity" />
       </main>
     </div>
   );

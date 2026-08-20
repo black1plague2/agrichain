@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Field, Input } from "@/components/ui/Field";
+import { Field, Input, Select } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 
 export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
@@ -51,18 +51,14 @@ export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Fasal / Crop">
-          <select
-            value={crop}
-            onChange={(e) => setCrop(e.target.value)}
-            className="border-[1.5px] border-ink bg-paper px-3 py-2.5 font-body text-sm text-ink outline-none focus:bg-paper-raised"
-          >
-            <option value="wheat">Gehun (Wheat)</option>
-            <option value="rice">Chawal (Rice)</option>
-            <option value="cotton">Kapas (Cotton)</option>
-          </select>
+        <Field label="Crop">
+          <Select value={crop} onChange={(e) => setCrop(e.target.value)}>
+            <option value="wheat">Wheat (Gehun)</option>
+            <option value="rice">Rice (Chawal)</option>
+            <option value="cotton">Cotton (Kapas)</option>
+          </Select>
         </Field>
-        <Field label="Wazan (kg) / Quantity">
+        <Field label="Quantity (kg)">
           <Input
             type="number"
             min={1}
@@ -73,7 +69,7 @@ export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
           />
         </Field>
       </div>
-      <Field label="Location (geohash)" hint="Demo ke liye koi bhi text chalega.">
+      <Field label="Collection Location" hint="Any text works for this deployment (geohash).">
         <Input value={geohash} onChange={(e) => setGeohash(e.target.value)} placeholder="tdr1y" />
       </Field>
       <Field label="Photo">
@@ -81,13 +77,13 @@ export function BatchRegisterForm({ farmerWallet }: { farmerWallet: string }) {
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="font-body text-sm text-ink-soft file:mr-3 file:border-[1.5px] file:border-ink file:bg-paper file:px-3 file:py-1.5 file:font-mono file:text-xs file:uppercase"
+          className="font-body text-sm text-text-secondary file:mr-3 file:border file:border-border-subtle file:bg-bg file:px-3 file:py-1.5 file:text-xs file:font-medium"
         />
       </Field>
-      <Button type="submit" variant="mustard" disabled={busy} className="self-start">
-        {busy ? "Register ho raha hai…" : "Batch Register Karein"}
+      <Button type="submit" variant="primary" disabled={busy} className="self-start">
+        {busy ? "Registering…" : "Register Batch"}
       </Button>
-      {error && <p className="border-[1.5px] border-terracotta bg-terracotta-tint px-3 py-2 text-sm text-terracotta-deep">{error}</p>}
+      {error && <p className="border border-danger bg-danger-tint px-3 py-2 text-sm text-danger-hover">{error}</p>}
     </form>
   );
 }

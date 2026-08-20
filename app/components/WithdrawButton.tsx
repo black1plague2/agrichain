@@ -29,10 +29,10 @@ export function WithdrawButton({ pendingAmount }: { pendingAmount: bigint }) {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button variant="mustard" onClick={withdraw} disabled={busy}>
-        {busy ? "Bhugtan aa raha hai…" : `${formatAgri(pendingAmount)} AGRI Nikaalein`}
+      <Button variant="primary" onClick={withdraw} disabled={busy}>
+        {busy ? "Processing…" : `Withdraw ${formatAgri(pendingAmount)} AGRI`}
       </Button>
-      {error && <p className="max-w-[220px] text-right text-xs text-terracotta-deep">{error}</p>}
+      {error && <p className="max-w-[220px] text-right text-xs text-danger-hover">{error}</p>}
     </div>
   );
 }
