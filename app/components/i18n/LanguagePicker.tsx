@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Translate } from "@phosphor-icons/react";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/lib/i18n/locale";
 import { setLocaleCookie } from "@/lib/i18n/clientLocale";
 
@@ -24,26 +25,34 @@ export function LanguagePicker() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-6">
-      <div className="w-full max-w-sm border border-border-subtle bg-bg p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-text-primary">
-          Choose your language <span className="text-text-secondary">·</span> अपनी भाषा चुनें{" "}
-          <span className="text-text-secondary">·</span> மொழியைத் தேர்ந்தெடுக்கவும்
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-6 backdrop-blur-[2px]">
+      <div className="animate-rise w-full max-w-sm border border-border-subtle bg-bg p-6 shadow-lg">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-tint text-accent">
+          <Translate size={18} weight="bold" />
+        </span>
+        <h2 className="mt-4 text-lg font-semibold leading-snug text-text-primary">
+          Choose your language <span className="text-text-placeholder">·</span> अपनी भाषा चुनें{" "}
+          <span className="text-text-placeholder">·</span> மொழியைத் தேர்ந்தெடுக்கவும்
         </h2>
         <p className="mt-2 text-xs text-text-placeholder">
           You can change this anytime from the header. Default: English.
         </p>
         <div className="mt-5 flex flex-col gap-2">
-          {LOCALES.map((locale) => (
+          {LOCALES.map((locale, i) => (
             <button
               key={locale}
               type="button"
               onClick={() => choose(locale)}
               disabled={busy !== null}
-              className="border border-border-strong bg-transparent px-4 py-3 text-left text-sm font-medium text-text-primary transition-colors hover:bg-layer disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ animationDelay: `${i * 0.05}s` }}
+              className="animate-rise group flex items-center justify-between border border-border-strong bg-transparent px-4 py-3 text-left text-sm font-medium text-text-primary transition-colors hover:border-accent hover:bg-accent-tint disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {LOCALE_NAMES[locale]}
-              {locale === "en" && <span className="ml-2 text-xs text-text-placeholder">(default)</span>}
+              <span>{LOCALE_NAMES[locale]}</span>
+              {locale === "en" && (
+                <span className="text-[10px] uppercase tracking-wide text-text-placeholder group-hover:text-accent">
+                  default
+                </span>
+              )}
             </button>
           ))}
         </div>

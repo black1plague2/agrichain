@@ -105,6 +105,41 @@ export async function getBatchStory(batchId: bigint) {
   return { batch, escrow: escrow ?? null, reading: reading ?? null, latestPrice: prices[0] ?? null };
 }
 
+export type MoneyTrailEntry =
+  | { type: "deposit"; amountWei: bigint; txHash: string; buyerWallet: string }
+  | { type: "farmerPayout"; amountWei: bigint; txHash: string }
+  | { type: "buyerRefund"; amountWei: bigint; txHash: string }
+  | { type: "timeoutRefund"; amountWei: bigint; txHash: string };
+
+/** The actual money movements for one batch, in order — deposit in, then either a settle (which
+ * can carry both a farmer payout and a buyer refund leg in the same tx) or a timeout refund.
+ * Built from the same raw_events log everything else reads, so it can never disagree with the
+ * activity feed or drift from what actually happened on-chain. */
+export async function getBatchMoneyTrail(batchId: bigint): Promise<MoneyTrailEntry[]> {
+  const rows = await db
+    .select()
+    .from(rawEvents)
+    .where(and(eq(rawEvents.contractName, "Escrow"), sql`${rawEvents.payload}->>'batchId' = ${batchId.toString()}`))
+    .orderBy(rawEvents.blockNumber, rawEvents.logIndex);
+
+  const entries: MoneyTrailEntry[] = [];
+  for (const row of rows) {
+    const p = row.payload as Record<string, string>;
+    const txHash = row.txHash;
+    if (row.eventName === "EscrowOpened") {
+      entries.push({ type: "deposit", amountWei: BigInt(p.depositAmount), txHash, buyerWallet: p.buyer });
+    } else if (row.eventName === "EscrowSettled") {
+      entries.push({ type: "farmerPayout", amountWei: BigInt(p.farmerPayout), txHash });
+      if (BigInt(p.buyerRefund) > 0n) {
+        entries.push({ type: "buyerRefund", amountWei: BigInt(p.buyerRefund), txHash });
+      }
+    } else if (row.eventName === "EscrowRefundedOnTimeout") {
+      entries.push({ type: "timeoutRefund", amountWei: BigInt(p.amount), txHash });
+    }
+  }
+  return entries;
+}
+
 export async function getLatestPrice(crop: string) {
   const rows = await db.query.priceHistory.findMany({
     where: eq(priceHistory.crop, crop),

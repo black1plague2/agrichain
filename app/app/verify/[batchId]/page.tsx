@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBatchStory } from "@/lib/data";
+import { getBatchStory, getBatchMoneyTrail } from "@/lib/data";
 import { Panel } from "@/components/ui/Panel";
 import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
 import { StatusDot, BatchStatusKey } from "@/components/ui/StatusDot";
 import { PipelineTracker } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { MoneyTrail } from "@/components/MoneyTrail";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { explorerAddressUrl } from "@/lib/chain";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -28,6 +29,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
   }
   if (!story) notFound();
 
+  const moneyTrail = await getBatchMoneyTrail(BigInt(batchId));
   const { batch, escrow, reading, latestPrice } = story;
   const deviationBps =
     escrow?.settled && reading
@@ -127,6 +129,10 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
             )}
           </div>
         </Panel>
+
+        <div className="mt-4">
+          <MoneyTrail entries={moneyTrail} locale={locale} />
+        </div>
 
         <div className="mt-4">
           <ActivityFeed batchId={batchId} title={t.fullStoryTitle} locale={locale} />

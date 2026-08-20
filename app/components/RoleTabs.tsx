@@ -24,7 +24,7 @@ export function RoleTabs({
           key={key}
           type="button"
           onClick={() => onChange(key)}
-          className={`flex-1 border-border-subtle px-3 py-3 text-center transition-colors ${
+          className={`flex-1 border-border-subtle px-3 py-3 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
             i > 0 ? "border-l" : ""
           } ${role === key ? "bg-accent text-text-on-color" : "bg-transparent text-text-primary hover:bg-layer"}`}
         >

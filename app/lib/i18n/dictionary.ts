@@ -212,6 +212,14 @@ export interface Dictionary {
     cacheDisclaimer: string;
   };
   batchQr: { clickToEnlarge: string; scanHint: string; close: string };
+  moneyTrail: {
+    title: string;
+    empty: string;
+    deposit: (amount: string, buyer: string) => string;
+    farmerPayout: (amount: string) => string;
+    buyerRefund: (amount: string) => string;
+    timeoutRefund: (amount: string) => string;
+  };
 }
 
 const en: Dictionary = {
@@ -472,6 +480,14 @@ const en: Dictionary = {
     scanHint: "Scan to open the public verification record for this batch.",
     close: "Close",
   },
+  moneyTrail: {
+    title: "Money Trail",
+    empty: "No money has moved for this batch yet.",
+    deposit: (amount, buyer) => `Buyer (${buyer}…) deposited ${amount} AGRI into escrow`,
+    farmerPayout: (amount) => `Farmer received ${amount} AGRI`,
+    buyerRefund: (amount) => `Buyer refunded ${amount} AGRI — undelivered shortfall`,
+    timeoutRefund: (amount) => `Buyer refunded ${amount} AGRI — escrow timed out, no weight ever verified`,
+  },
 };
 
 const hi: Dictionary = {
@@ -731,6 +747,14 @@ const hi: Dictionary = {
     clickToEnlarge: "बड़ा करने के लिए क्लिक करें",
     scanHint: "इस बैच के सार्वजनिक सत्यापन रिकॉर्ड को खोलने के लिए स्कैन करें।",
     close: "बंद करें",
+  },
+  moneyTrail: {
+    title: "पैसे का रास्ता",
+    empty: "इस बैच के लिए अभी तक कोई पैसा नहीं चला।",
+    deposit: (amount, buyer) => `खरीदार (${buyer}…) ने एस्क्रो में ${amount} AGRI जमा किया`,
+    farmerPayout: (amount) => `किसान को ${amount} AGRI मिला`,
+    buyerRefund: (amount) => `खरीदार को ${amount} AGRI वापस मिला — डिलीवरी में कमी`,
+    timeoutRefund: (amount) => `खरीदार को ${amount} AGRI वापस मिला — एस्क्रो का समय पूरा हुआ, कभी वज़न सत्यापित नहीं हुआ`,
   },
 };
 
@@ -996,6 +1020,14 @@ const ta: Dictionary = {
     clickToEnlarge: "பெரிதாக்க கிளிக் செய்யவும்",
     scanHint: "இந்த பேட்சின் பொது சரிபார்ப்பு பதிவைத் திறக்க ஸ்கேன் செய்யவும்.",
     close: "மூடு",
+  },
+  moneyTrail: {
+    title: "பணப் பாதை",
+    empty: "இந்த பேட்சிற்கு இதுவரை பணம் நகரவில்லை.",
+    deposit: (amount, buyer) => `வாங்குபவர் (${buyer}…) எஸ்க்ரோவில் ${amount} AGRI வைப்பு செய்தார்`,
+    farmerPayout: (amount) => `விவசாயிக்கு ${amount} AGRI கிடைத்தது`,
+    buyerRefund: (amount) => `வாங்குபவருக்கு ${amount} AGRI திரும்பச் செலுத்தப்பட்டது — வழங்கப்படாத குறைபாடு`,
+    timeoutRefund: (amount) => `வாங்குபவருக்கு ${amount} AGRI திரும்பச் செலுத்தப்பட்டது — எஸ்க்ரோ காலாவதியானது, எடை ஒருபோதும் சரிபார்க்கப்படவில்லை`,
   },
 };
 
