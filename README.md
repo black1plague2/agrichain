@@ -2,8 +2,6 @@
 
 **Batch se bhugtan tak, sab chain par.** A mandi transaction ledger where weight can't be faked, price can't be argued, and payment can't be delayed — built on Polygon Amoy for $0 running cost.
 
-> Hackathon MVP. See [`PLAN.md`](./PLAN.md) for the full design doc and [`CHECKLIST.md`](./CHECKLIST.md) for line-by-line build status.
-
 ---
 
 ## The problem, in one picture
@@ -194,12 +192,4 @@ npm run indexer   # terminal 1
 npm run dev         # terminal 2
 ```
 
-Four things only you can provide (all free, no crypto needed except the faucet): a funded Amoy wallet ([faucet](https://faucet.polygon.technology)), an Amoy RPC URL, a [Neon](https://neon.tech) project, and a [Pinata](https://pinata.cloud) account.
-
-## Demo script
-
-Full walkthrough in [`PLAN.md` §8](./PLAN.md#8-demo-script). Short version: register a batch → buyer escrows it → logistics picks up, delivers, weighs it → watch the payment settle automatically → scan the QR to verify the whole story.
-
 ---
-
-*Built for a hackathon. The honest-framing section above isn't boilerplate — read it before you pitch this.*
