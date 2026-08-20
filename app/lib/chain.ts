@@ -1,6 +1,18 @@
 import { createPublicClient, createWalletClient, http, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+const REAL_RPC_URL = process.env.NEXT_PUBLIC_AMOY_RPC_URL ?? process.env.AMOY_RPC_URL ?? "";
+
+// Server-side code (API routes, the indexer, worker scripts) talks to the real RPC URL directly
+// — no CORS involved server-to-server. Browser code goes through our own same-origin
+// /api/rpc proxy instead: hitting the tunnel URL directly from a real browser breaks, because
+// skipping localtunnel's browser interstitial needs a custom header, and that custom header
+// forces a CORS preflight that Anvil's own CORS policy (content-type only) rejects — so the
+// browser silently refuses to ever send the real request. Routing through our own domain avoids
+// the preflight entirely (same-origin), and the proxy route adds the bypass header server-side,
+// where CORS doesn't apply. See app/api/rpc/route.ts.
+const resolvedRpcUrl = typeof window === "undefined" ? REAL_RPC_URL : "/api/rpc";
+
 // Named "amoy" for the production target, but the id is read from NEXT_PUBLIC_CHAIN_ID so this
 // same client code works against a local Anvil chain (31337) during development — a hardcoded
 // 80002 here caused MetaMask to reject every write with a chain-mismatch error when testing
@@ -10,7 +22,7 @@ export const amoy = {
   name: "Polygon Amoy",
   nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
   rpcUrls: {
-    default: { http: [process.env.NEXT_PUBLIC_AMOY_RPC_URL ?? process.env.AMOY_RPC_URL ?? ""] },
+    default: { http: [resolvedRpcUrl] },
   },
 } as const;
 
@@ -20,13 +32,8 @@ export function requireEnv(name: string): string {
   return value;
 }
 
-// When the RPC URL is a localtunnel domain (the local-Anvil-tunneled-to-the-internet demo
-// setup), localtunnel shows an HTML "Tunnel website ahead!" interstitial instead of proxying
-// the request to any client whose IP it hasn't seen in the last 7 days — including real site
-// visitors' browsers making these RPC calls directly (publicClient runs client-side too, not
-// just in this server's requests). That interstitial breaks every read/write with a cryptic
-// "HTTP request failed. Status: 511" from viem. localtunnel's own bypass is a request header;
-// harmless to send unconditionally even against real Amoy, which just ignores it.
+// Adds the tunnel bypass header unconditionally — harmless server-to-server against real Amoy
+// (an unrecognized header is just ignored), and harmless against our own /api/rpc proxy too.
 const rpcTransport = http(undefined, { fetchOptions: { headers: { "bypass-tunnel-reminder": "1" } } });
 
 export const publicClient = createPublicClient({
