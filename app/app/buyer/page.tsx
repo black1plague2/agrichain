@@ -7,6 +7,7 @@ import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
 import { OpenEscrowButton } from "@/components/OpenEscrowButton";
 import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
+import { ActivityFeed } from "@/components/ActivityFeed";
 
 export default async function BuyerPage() {
   const session = await getSession();
@@ -100,6 +101,8 @@ export default async function BuyerPage() {
             </table>
           )}
         </Panel>
+
+        <ActivityFeed title="Platform Activity — Kya Ho Raha Hai" />
       </main>
     </div>
   );

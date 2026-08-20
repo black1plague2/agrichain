@@ -8,6 +8,7 @@ import { StatusDot, BatchStatusKey } from "@/components/ui/StatusDot";
 import { LogisticsActions } from "@/components/LogisticsActions";
 import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
+import { ActivityFeed } from "@/components/ActivityFeed";
 
 export default async function LogisticsPage() {
   const session = await getSession();
@@ -85,6 +86,8 @@ export default async function LogisticsPage() {
             </div>
           )}
         </Panel>
+
+        <ActivityFeed title="Platform Activity — Kya Ho Raha Hai" />
       </main>
     </div>
   );

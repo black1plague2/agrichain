@@ -1,9 +1,46 @@
 import "server-only";
 import { eq, desc, and, isNull, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { batches, escrows, priceHistory, weighbridgeReadings } from "@/db/schema";
+import { batches, escrows, priceHistory, weighbridgeReadings, rawEvents } from "@/db/schema";
 import { publicClient, contractAddresses } from "./chain";
 import { agriTokenAbi, escrowAbi } from "./abis";
+import { humanizeEvent, type ActivityEntry } from "./activity";
+
+/** Most recent human-readable activity across the whole platform — powers the live feed on
+ * every dashboard. Reads the same raw_events log the indexer already writes, nothing new stored. */
+export async function getRecentActivity(limit = 20): Promise<ActivityEntry[]> {
+  const rows = await db
+    .select()
+    .from(rawEvents)
+    .orderBy(desc(rawEvents.blockNumber), desc(rawEvents.logIndex))
+    .limit(limit * 2); // over-fetch since some rows humanize to null (filtered out)
+
+  const entries: ActivityEntry[] = [];
+  for (const row of rows) {
+    const entry = humanizeEvent(row);
+    if (entry) entries.push(entry);
+    if (entries.length >= limit) break;
+  }
+  return entries;
+}
+
+/** Same feed, scoped to one batch — powers /verify/:batchId's story. */
+export async function getBatchActivity(batchId: bigint, limit = 20): Promise<ActivityEntry[]> {
+  const rows = await db
+    .select()
+    .from(rawEvents)
+    .where(sql`${rawEvents.payload}->>'batchId' = ${batchId.toString()}`)
+    .orderBy(desc(rawEvents.blockNumber), desc(rawEvents.logIndex))
+    .limit(limit * 2);
+
+  const entries: ActivityEntry[] = [];
+  for (const row of rows) {
+    const entry = humanizeEvent(row);
+    if (entry) entries.push(entry);
+    if (entries.length >= limit) break;
+  }
+  return entries;
+}
 
 export async function getFarmerBatches(wallet: string) {
   const rows = await db

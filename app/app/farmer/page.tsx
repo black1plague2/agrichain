@@ -9,6 +9,7 @@ import { BatchRegisterForm } from "@/components/BatchRegisterForm";
 import { WithdrawButton } from "@/components/WithdrawButton";
 import { PipelineDots } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
+import { ActivityFeed } from "@/components/ActivityFeed";
 
 export default async function FarmerPage() {
   const session = await getSession();
@@ -86,6 +87,8 @@ export default async function FarmerPage() {
             </div>
           )}
         </Panel>
+
+        <ActivityFeed title="Platform Activity — Kya Ho Raha Hai" />
       </main>
     </div>
   );

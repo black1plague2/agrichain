@@ -6,6 +6,7 @@ import { Numeral, formatAgri, formatKg } from "@/components/ui/Numeral";
 import { StatusDot, BatchStatusKey } from "@/components/ui/StatusDot";
 import { PipelineTracker } from "@/components/PipelineTracker";
 import { derivePipelineStage } from "@/lib/pipeline";
+import { ActivityFeed } from "@/components/ActivityFeed";
 
 const AMOY_EXPLORER = "https://amoy.polygonscan.com";
 const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
@@ -121,6 +122,10 @@ export default async function VerifyPage({ params }: { params: Promise<{ batchId
             )}
           </div>
         </Panel>
+
+        <div className="mt-4">
+          <ActivityFeed batchId={batchId} title="This Batch's Full Story, In Order" />
+        </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <a
