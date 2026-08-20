@@ -20,15 +20,24 @@ export function requireEnv(name: string): string {
   return value;
 }
 
+// When the RPC URL is a localtunnel domain (the local-Anvil-tunneled-to-the-internet demo
+// setup), localtunnel shows an HTML "Tunnel website ahead!" interstitial instead of proxying
+// the request to any client whose IP it hasn't seen in the last 7 days — including real site
+// visitors' browsers making these RPC calls directly (publicClient runs client-side too, not
+// just in this server's requests). That interstitial breaks every read/write with a cryptic
+// "HTTP request failed. Status: 511" from viem. localtunnel's own bypass is a request header;
+// harmless to send unconditionally even against real Amoy, which just ignores it.
+const rpcTransport = http(undefined, { fetchOptions: { headers: { "bypass-tunnel-reminder": "1" } } });
+
 export const publicClient = createPublicClient({
   chain: amoy,
-  transport: http(),
+  transport: rpcTransport,
 });
 
 /** Wallet client for the relayer's sponsor key — pays gas for farmer meta-transactions. */
 export function relayerWalletClient() {
   const account = privateKeyToAccount(requireEnv("RELAYER_PRIVATE_KEY") as `0x${string}`);
-  return createWalletClient({ account, chain: amoy, transport: http() });
+  return createWalletClient({ account, chain: amoy, transport: rpcTransport });
 }
 
 /** Wallet client for the weighbridge device's own key — never shared with the app/relayer key. */
@@ -39,7 +48,7 @@ export function deviceAccount() {
 /** Wallet client for the oracle feed job's key. */
 export function oracleFeedWalletClient() {
   const account = privateKeyToAccount(requireEnv("ORACLE_FEED_PRIVATE_KEY") as `0x${string}`);
-  return createWalletClient({ account, chain: amoy, transport: http() });
+  return createWalletClient({ account, chain: amoy, transport: rpcTransport });
 }
 
 /** True only when this deployment is actually pointed at public Polygon Amoy — a local Anvil
