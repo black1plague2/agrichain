@@ -81,6 +81,7 @@ export interface Dictionary {
     noPriceSet: string;
     historyPanelTitle: string;
     historyEmpty: string;
+    historyOtherPrefix: string;
     colBatch: string;
     colDeposit: string;
     colJourney: string;
@@ -105,6 +106,7 @@ export interface Dictionary {
     photoLabel: string;
     submit: string;
     submitting: string;
+    syncing: string;
   };
   logisticsActions: {
     confirmPickup: string;
@@ -343,6 +345,7 @@ const en: Dictionary = {
     noPriceSet: "no price set for this crop yet",
     historyPanelTitle: "Your Settlement History",
     historyEmpty: "No escrows opened yet.",
+    historyOtherPrefix: "Escrow opened with another account",
     colBatch: "Batch",
     colDeposit: "Deposit",
     colJourney: "Journey",
@@ -367,6 +370,7 @@ const en: Dictionary = {
     photoLabel: "Photo",
     submit: "Register Batch",
     submitting: "Registering…",
+    syncing: "Registered on-chain — syncing the dashboard…",
   },
   logisticsActions: {
     confirmPickup: "Confirm Pickup",
@@ -611,6 +615,7 @@ const hi: Dictionary = {
     noPriceSet: "इस फसल के लिए अभी दाम तय नहीं हुआ",
     historyPanelTitle: "आपका निपटान इतिहास",
     historyEmpty: "अभी तक कोई एस्क्रो नहीं खोला गया।",
+    historyOtherPrefix: "दूसरे खाते से खोला गया एस्क्रो",
     colBatch: "बैच",
     colDeposit: "जमा",
     colJourney: "यात्रा",
@@ -635,6 +640,7 @@ const hi: Dictionary = {
     photoLabel: "फ़ोटो",
     submit: "बैच दर्ज करें",
     submitting: "दर्ज हो रहा है…",
+    syncing: "ऑन-चेन दर्ज हो गया — डैशबोर्ड सिंक हो रहा है…",
   },
   logisticsActions: {
     confirmPickup: "पिकअप की पुष्टि करें",
@@ -879,6 +885,7 @@ const ta: Dictionary = {
     noPriceSet: "இந்த பயிருக்கு இன்னும் விலை நிர்ணயிக்கப்படவில்லை",
     historyPanelTitle: "உங்கள் தீர்வு வரலாறு",
     historyEmpty: "இதுவரை எஸ்க்ரோ எதுவும் திறக்கப்படவில்லை.",
+    historyOtherPrefix: "மற்றொரு கணக்கில் திறக்கப்பட்ட எஸ்க்ரோ",
     colBatch: "பேட்ச்",
     colDeposit: "வைப்பு",
     colJourney: "பயணம்",
@@ -903,6 +910,7 @@ const ta: Dictionary = {
     photoLabel: "புகைப்படம்",
     submit: "பேட்ச் பதிவு செய்யவும்",
     submitting: "பதிவு செய்கிறது…",
+    syncing: "சங்கிலியில் பதிவானது — டாஷ்போர்டு ஒத்திசைகிறது…",
   },
   logisticsActions: {
     confirmPickup: "எடுப்பை உறுதிப்படுத்தவும்",

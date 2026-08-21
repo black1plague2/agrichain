@@ -1,5 +1,5 @@
 import "server-only";
-import { eq, desc, and, isNull, sql } from "drizzle-orm";
+import { eq, desc, and, isNull, sql, ne } from "drizzle-orm";
 import { db } from "@/db/client";
 import { batches, escrows, priceHistory, weighbridgeReadings, rawEvents } from "@/db/schema";
 import { publicClient, contractAddresses } from "./chain";
@@ -71,7 +71,17 @@ export async function getBuyerEscrows(wallet: string) {
     .from(escrows)
     .innerJoin(batches, eq(batches.batchId, escrows.batchId))
     .leftJoin(weighbridgeReadings, eq(weighbridgeReadings.batchId, escrows.batchId))
-    .where(eq(escrows.buyerWallet, wallet))
+    .where(sql`lower(${escrows.buyerWallet}) = ${wallet.toLowerCase()}`)
+    .orderBy(desc(escrows.openedAt));
+  return rows;
+}
+
+/** Escrows opened by a different wallet than the caller — used to explain an empty history. */
+export async function getOtherBuyerEscrows(wallet: string) {
+  const rows = await db
+    .select({ batchId: escrows.batchId, buyerWallet: escrows.buyerWallet, openedAt: escrows.openedAt })
+    .from(escrows)
+    .where(sql`lower(${escrows.buyerWallet}) <> ${wallet.toLowerCase()}`)
     .orderBy(desc(escrows.openedAt));
   return rows;
 }

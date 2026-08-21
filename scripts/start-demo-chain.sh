@@ -38,6 +38,7 @@ SEED_BUYER_ADDR=0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65                      
 # and LOGISTICS_ROLE on every restart — no need to ask anyone to run cast commands for you.
 EXTRA_TEST_WALLETS=(
   0xADCE48f609D12805aFCd5792Bd902EEAa7580C96
+  0x26a2F149B6f0F2BAfcfc0628a86b985B60225D6c
 )
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -90,10 +91,15 @@ echo "    Escrow:              $ESCROW"
 
 echo "==> [3/7] Syncing app/.env.local with this run's addresses..."
 python_free_sed() {
-  # Portable in-place replace for a KEY=... line, works the same on git-bash/Linux/macOS sed.
+  # Portable in-place replace for a KEY=... line. macOS (BSD) sed requires a backup
+  # extension after -i; GNU sed (Linux/git-bash) must NOT have one. Detect via --version.
   local key="$1" value="$2"
   if grep -q "^${key}=" "$ENV_FILE"; then
-    sed -i "s#^${key}=.*#${key}=${value}#" "$ENV_FILE"
+    if sed --version >/dev/null 2>&1; then
+      sed -i "s#^${key}=.*#${key}=${value}#" "$ENV_FILE"
+    else
+      sed -i '' "s#^${key}=.*#${key}=${value}#" "$ENV_FILE"
+    fi
   else
     echo "${key}=${value}" >> "$ENV_FILE"
   fi

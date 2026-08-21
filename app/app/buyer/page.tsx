@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
-import { getAvailableBatches, getBuyerEscrows, getLatestPrice } from "@/lib/data";
+import { getAvailableBatches, getBuyerEscrows, getLatestPrice, getOtherBuyerEscrows } from "@/lib/data";
 import { getPlatformAnalytics } from "@/lib/analytics";
 import { Header } from "@/components/Header";
 import { Panel } from "@/components/ui/Panel";
@@ -21,10 +21,11 @@ export default async function BuyerPage() {
   const t = dict(locale);
   const crops = t.common.crops;
 
-  const [available, myEscrows, analytics] = await Promise.all([
+  const [available, myEscrows, analytics, otherEscrows] = await Promise.all([
     getAvailableBatches(),
     getBuyerEscrows(session.wallet),
     getPlatformAnalytics(),
+    getOtherBuyerEscrows(session.wallet),
   ]);
   const prices = await Promise.all(
     Array.from(new Set(available.map((b) => b.crop))).map(async (crop) => [crop, await getLatestPrice(crop)] as const)
@@ -86,7 +87,19 @@ export default async function BuyerPage() {
 
         <Panel title={t.buyerPage.historyPanelTitle} stamp={`${myEscrows.length} total`}>
           {myEscrows.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-placeholder">{t.buyerPage.historyEmpty}</p>
+            <div className="py-6 text-center">
+              <p className="text-sm text-text-placeholder">{t.buyerPage.historyEmpty}</p>
+              {otherEscrows.length > 0 && (
+                <p className="mx-auto mt-2 max-w-xl text-xs text-text-secondary">
+                  {otherEscrows
+                    .map(
+                      (e) =>
+                        `${t.buyerPage.historyOtherPrefix} #${e.batchId.toString()} (${e.buyerWallet.slice(0, 6)}…${e.buyerWallet.slice(-4)})`
+                    )
+                    .join(" · ")}
+                </p>
+              )}
+            </div>
           ) : (
             <table className="w-full text-left text-sm">
               <thead>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TransactionSteps, type Step } from "@/components/ui/TransactionSteps";
 import { publicClient, contractAddresses } from "@/lib/chain";
-import { getBrowserWalletClient, getConnectedAddress } from "@/lib/browserWallet";
+import { getBrowserWalletClient, getConnectedAddress, ensureWalletChain } from "@/lib/browserWallet";
 import { fairPriceOracleAbi, agriTokenAbi, escrowAbi } from "@/lib/abis";
 import { dict } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
@@ -38,6 +38,7 @@ export function OpenEscrowButton({
     try {
       const buyer = await getConnectedAddress();
       const wallet = getBrowserWalletClient();
+      await ensureWalletChain();
       setStep(0, { state: "done" });
 
       setStep(1, { state: "active" });

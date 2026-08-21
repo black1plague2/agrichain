@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Field";
 import { TransactionSteps, type Step } from "@/components/ui/TransactionSteps";
 import { publicClient, contractAddresses } from "@/lib/chain";
-import { getBrowserWalletClient, getConnectedAddress } from "@/lib/browserWallet";
+import { getBrowserWalletClient, getConnectedAddress, ensureWalletChain } from "@/lib/browserWallet";
 import { batchRegistryAbi, weighbridgeRegistryAbi, escrowAbi } from "@/lib/abis";
 import { dict } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
@@ -52,6 +52,7 @@ export function LogisticsActions({
     setSteps([{ label, state: "active" }]);
     try {
       const account = await getConnectedAddress();
+      await ensureWalletChain();
       const hash = await run(account);
       await publicClient.waitForTransactionReceipt({ hash });
       setStep(0, { state: "done", txHash: hash });
@@ -109,6 +110,7 @@ export function LogisticsActions({
     try {
       const account = await getConnectedAddress();
       const wallet = getBrowserWalletClient();
+      await ensureWalletChain();
 
       const [, assigned] = await publicClient.readContract({
         address: contractAddresses.weighbridgeRegistry,

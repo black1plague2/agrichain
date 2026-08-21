@@ -43,7 +43,11 @@ export function BatchRegisterForm({ farmerWallet, locale }: { farmerWallet: stri
       setQuantityKg("");
       setGeohash("");
       setFile(null);
-      router.refresh();
+      const startedAt = Date.now();
+      while (Date.now() - startedAt < 30000) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -86,6 +90,11 @@ export function BatchRegisterForm({ farmerWallet, locale }: { farmerWallet: stri
       <Button type="submit" variant="primary" disabled={busy} className="self-start">
         {busy ? t.batchRegisterForm.submitting : t.batchRegisterForm.submit}
       </Button>
+      {busy && (
+        <p className="text-xs text-text-secondary">
+          {t.batchRegisterForm.syncing}
+        </p>
+      )}
       {error && <p className="border border-danger bg-danger-tint px-3 py-2 text-sm text-danger-hover">{error}</p>}
     </form>
   );
